@@ -405,6 +405,7 @@ h1 {
 
 <script>
 // ====== CONFIG ======
+const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjZ2dnbnRyaHRma2pnbHhuYmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTM3NTgsImV4cCI6MjA5MTA2OTc1OH0.3ovqqIAGDpg-tHig-kddy5fa0PIgtLttkfhBqI7prAk';
 const CHAPTERS = {
   'Direct Tax Laws': [
     'Basic Concepts',
@@ -569,7 +570,7 @@ const POINTS_PER_CHAPTER = 10;
 // ====== STATE ======
 let userId = localStorage.getItem('userId');
 let supabaseUrl = localStorage.getItem('supabaseUrl');
-let supabaseKey = localStorage.getItem('supabaseKey');
+let supabaseKey = localStorage.getItem('supabaseKey') || DEFAULT_SUPABASE_KEY;
 let supabaseReady = false;
 let localProgress = {};
 
@@ -787,7 +788,7 @@ function updateSyncStatus(syncing = false) {
 function setupUser() {
   const name = document.getElementById('userNameInput').value;
   const url = document.getElementById('supabaseUrlInput').value;
-  const key = document.getElementById('supabaseKeyInput').value;
+  const key = document.getElementById('supabaseKeyInput').value || DEFAULT_SUPABASE_KEY;
   
   if (!name || !url || !key) {
     alert('Please fill in all fields');
@@ -811,6 +812,7 @@ function setupUser() {
 // ====== INIT ======
 document.addEventListener('DOMContentLoaded', () => {
   localProgress = JSON.parse(localStorage.getItem('progress') || '{}');
+  document.getElementById('supabaseKeyInput').value = supabaseKey;
   
   if (userId && supabaseUrl && supabaseKey) {
     document.getElementById('setupModal').classList.remove('active');
