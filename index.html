@@ -221,66 +221,6 @@ body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;font
 .vel-item{display:flex;flex-direction:column;gap:2px;}
 .vel-val{font-family:'DM Mono',monospace;font-size:15px;color:var(--text);}
 .vel-label{font-size:10px;color:var(--text3);}
-
-/* TIMER + SETTINGS */
-.panel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
-.panel-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
-.panel-title{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
-.timer-main{font-family:'DM Mono',monospace;font-size:46px;letter-spacing:.04em;line-height:1;color:var(--text);margin-bottom:12px;}
-.timer-sub{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:10px;}
-.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.chip{font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;border:1px solid var(--border);padding:3px 8px;border-radius:999px;background:var(--bg3);}
-.input-sm{padding:7px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;max-width:110px;}
-.input-sm:focus{border-color:var(--border2);}
-.helper{font-size:11px;color:var(--text3);margin-top:8px;}
-.sync-note{font-size:10px;color:var(--text3);margin-top:8px;font-family:'DM Mono',monospace;}
-
-/* RESPONSIVE */
-@media (max-width: 1100px) {
-  .main { padding: 24px 24px; }
-  .phase-grid, .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .two-col { grid-template-columns: 1fr; }
-  .panel-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 760px) {
-  .shell { flex-direction: column; }
-  .sidebar {
-    width: 100%;
-    min-width: 0;
-    height: auto;
-    position: relative;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-  .logo { padding: 16px 14px 12px; }
-  .nav { padding: 10px; }
-  .nav-section {
-    margin-bottom: 10px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px;
-  }
-  .sidebar-footer { padding: 12px 14px; }
-  .main { padding: 16px 12px 22px; }
-  .page-heading { font-size: 24px; }
-  .page-sub { margin-bottom: 18px; }
-  .phase-grid, .stats-row, .chapters-grid, .notes-grid { grid-template-columns: 1fr; }
-  .mock-round-card { overflow-x: auto; }
-  .mock-table { min-width: 520px; }
-  .modal { width: 94vw; padding: 18px 16px; border-radius: 12px; }
-  .milestone-toggles { grid-template-columns: repeat(2, 1fr); }
-  .chat-link-row { flex-wrap: wrap; }
-  .chat-link-input { min-width: 100%; }
-  .open-chat-btn, .save-btn { width: 100%; justify-content: center; }
-}
-
-@media (max-width: 460px) {
-  .milestone-toggles { grid-template-columns: 1fr; }
-  .stat-val { font-size: 22px; }
-  .pom-display { font-size: 24px; }
-}
 </style>
 </head>
 <body>
@@ -306,14 +246,6 @@ body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;font
       <button class="nav-btn" onclick="showView('notes')" id="nav-notes">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>
         Notes
-      </button>
-      <button class="nav-btn" onclick="showView('timer')" id="nav-timer">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5"/><path d="M9 3h6"/></svg>
-        Timer
-      </button>
-      <button class="nav-btn" onclick="showView('settings')" id="nav-settings">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 4.6 15a1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 8.9 4.6a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 19.4 9"/></svg>
-        Settings
       </button>
     </div>
     <div class="nav-section">
@@ -421,79 +353,6 @@ body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;font
   <div class="notes-grid" id="notes-grid"></div>
 </div>
 
-<!-- TIMER VIEW -->
-<div class="view" id="view-timer">
-  <div class="page-heading">Study Timer</div>
-  <div class="page-sub">Persistent Pomodoro timer synced with your progress.</div>
-  <div class="panel-grid">
-    <div class="panel-card">
-      <div class="panel-title">Current session</div>
-      <div class="timer-main" id="timer-main">25:00</div>
-      <div class="timer-sub" id="timer-mode">Focus</div>
-      <div class="row">
-        <button class="action-btn accent" onclick="togglePomodoro()" id="timer-start-btn">Start</button>
-        <button class="action-btn" onclick="resetPomodoro()">Reset</button>
-        <button class="action-btn" onclick="skipPomodoro()">Skip</button>
-      </div>
-      <div class="row" style="margin-top:10px">
-        <span class="chip" id="timer-sessions-chip">0 sessions today</span>
-        <span class="chip" id="timer-sync-chip">synced</span>
-      </div>
-    </div>
-    <div class="panel-card">
-      <div class="panel-title">Durations</div>
-      <div class="row">
-        <label class="helper">Focus</label>
-        <input type="number" min="10" max="120" id="timer-focus-min" class="input-sm" />
-        <label class="helper">Break</label>
-        <input type="number" min="3" max="30" id="timer-break-min" class="input-sm" />
-        <button class="action-btn" onclick="saveTimerSettings()">Apply</button>
-      </div>
-      <div class="helper">Tip: Recommended 50 / 10 for CA prep blocks.</div>
-    </div>
-  </div>
-</div>
-
-<!-- SETTINGS VIEW -->
-<div class="view" id="view-settings">
-  <div class="page-heading">Settings & Notifications</div>
-  <div class="page-sub">Enable alerts, reminders, and backup your data.</div>
-  <div class="panel-grid">
-    <div class="panel-card">
-      <div class="panel-title">Browser notifications</div>
-      <div class="row">
-        <span class="chip" id="notif-status-chip">permission: default</span>
-        <button class="action-btn" onclick="requestNotificationPermission()">Enable</button>
-        <button class="action-btn" onclick="sendTestNotification()">Test</button>
-      </div>
-      <div class="helper">You will receive alerts on timer completion and reminder time.</div>
-    </div>
-    <div class="panel-card">
-      <div class="panel-title">Daily reminder</div>
-      <div class="row">
-        <input type="time" id="daily-reminder-time" class="input-sm" style="max-width:150px" />
-        <button class="action-btn" onclick="saveReminderTime()">Save</button>
-      </div>
-      <div class="helper">Default is 19:00.</div>
-    </div>
-    <div class="panel-card">
-      <div class="panel-title">Backup</div>
-      <div class="row">
-        <button class="action-btn" onclick="exportBackup()">Export JSON</button>
-        <input type="file" id="import-backup-file" class="input-sm" style="max-width:230px" accept="application/json" />
-        <button class="action-btn" onclick="importBackup()">Import</button>
-      </div>
-    </div>
-    <div class="panel-card">
-      <div class="panel-title">Reset</div>
-      <div class="row">
-        <button class="action-btn" onclick="resetTrackerData()">Reset all tracker data</button>
-      </div>
-      <div class="sync-note">Cloud and local data will be overwritten.</div>
-    </div>
-  </div>
-</div>
-
 </main>
 </div>
 
@@ -572,7 +431,6 @@ const FIREBASE_CONFIG = {
 };
 const FIREBASE_COLLECTION = "ca_hub";
 const FIREBASE_DOC        = "koushika_2026";
-const FIREBASE_ENABLE_PERSISTENCE = true;
 // ────────────────────────────────────────────────────────────────────────────
 
 // ── SYLLABUS DATA ────────────────────────────────────────────────────────────
@@ -685,76 +543,23 @@ let docRef = null;
 let unsubscribe = null;
 let noteDebounce = {};
 
-function ensureDefaults() {
-  if (!state || typeof state !== 'object') state = {};
-  if (!state.timer_state || typeof state.timer_state !== 'object') {
-    state.timer_state = {
-      remaining: 25*60,
-      active: false,
-      breakMode: false,
-      focusMin: 25,
-      breakMin: 5,
-      sessionsToday: 0,
-      sessionsDate: new Date().toISOString().slice(0,10),
-      lastTick: 0
-    };
-  }
-  if (!state.daily_reminder) state.daily_reminder = '19:00';
-  const today = new Date().toISOString().slice(0,10);
-  if (state.timer_state.sessionsDate !== today) {
-    state.timer_state.sessionsDate = today;
-    state.timer_state.sessionsToday = 0;
-  }
-}
-
-function readLocalState() {
-  try {
-    const s = localStorage.getItem('ca_hub_v3');
-    const parsed = s ? JSON.parse(s) : {};
-    state = parsed || {};
-    ensureDefaults();
-    return state;
-  } catch (e) {
-    state = {};
-    ensureDefaults();
-    return state;
-  }
-}
-
-function writeLocalState() {
-  try { localStorage.setItem('ca_hub_v3', JSON.stringify(state)); } catch (e) {}
-}
-
 function initFirebase() {
-  // Hydrate local state first so refresh never starts from blank.
-  state = readLocalState();
   const configured = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
   if (!configured) {
     setSyncStatus(false, 'local only');
-    renderAll();
+    loadLocal();
     return;
   }
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
     const db = firebase.firestore();
-    if (FIREBASE_ENABLE_PERSISTENCE) {
-      db.enablePersistence({ synchronizeTabs: true }).catch(err => {
-        console.warn('Firestore persistence unavailable:', err?.code || err);
-      });
-    }
     docRef = db.collection(FIREBASE_COLLECTION).doc(FIREBASE_DOC);
     setSyncStatus(false, 'connecting…');
     unsubscribe = docRef.onSnapshot(snap => {
       if (snap.exists) {
-        // Preserve any unsynced local keys while applying remote truth.
-        state = {...state, ...snap.data()};
-        ensureDefaults();
-        writeLocalState();
+        state = snap.data();
       } else {
-        docRef.set(state, {merge:true}).catch(err => {
-          console.error('Initial Firestore bootstrap failed:', err);
-          setSyncStatus(false, 'offline — local save');
-        });
+        docRef.set(state, {merge:true});
       }
       firebaseReady = true;
       setSyncStatus(true, 'live');
@@ -772,40 +577,34 @@ function initFirebase() {
 }
 
 function loadLocal() {
-  state = readLocalState();
-  ensureDefaults();
+  try { const s = localStorage.getItem('ca_hub_v3'); if (s) state = JSON.parse(s); } catch(e) {}
   renderAll();
 }
 
 function setSyncStatus(live, label) {
   const dot = document.getElementById('sync-dot');
   const lbl = document.getElementById('sync-label');
-  const chip = document.getElementById('timer-sync-chip');
   if (dot) dot.className = 'sync-dot' + (live ? ' live' : '');
   if (lbl) lbl.textContent = label;
-  if (chip) chip.textContent = live ? 'live sync' : 'local mode';
 }
 
 function save(key, value) {
   state[key] = value;
-  writeLocalState();
   if (firebaseReady && docRef) {
     docRef.update({[key]: value}).catch(() => {
-      docRef.set({[key]: value}, {merge:true}).catch(() => {
-        setSyncStatus(false, 'sync blocked — local save');
-      });
+      docRef.set({[key]: value}, {merge:true});
     });
+  } else {
+    try { localStorage.setItem('ca_hub_v3', JSON.stringify(state)); } catch(e) {}
   }
 }
 
 function saveBatch(obj) {
   Object.assign(state, obj);
-  ensureDefaults();
-  writeLocalState();
   if (firebaseReady && docRef) {
-    docRef.update(obj).catch(() => docRef.set(obj, {merge:true}).catch(() => {
-      setSyncStatus(false, 'sync blocked — local save');
-    }));
+    docRef.update(obj).catch(() => docRef.set(obj, {merge:true}));
+  } else {
+    try { localStorage.setItem('ca_hub_v3', JSON.stringify(state)); } catch(e) {}
   }
 }
 
@@ -921,218 +720,50 @@ function getWeekHours() {
   return days;
 }
 
-// ── POMODORO / TIMER ─────────────────────────────────────────────────────────
-let pomInterval = null;
-let reminderInterval = null;
-
-function timerState() {
-  ensureDefaults();
-  return state.timer_state;
-}
-
-function persistTimerState() {
-  save('timer_state', timerState());
-}
-
-function maybeNotify(title, body) {
-  if (!('Notification' in window)) return;
-  if (Notification.permission === 'granted') {
-    try { new Notification(title, { body }); } catch (e) {}
-  }
-}
-
-function requestNotificationPermission() {
-  if (!('Notification' in window)) {
-    showToast('Notifications not supported in this browser');
-    return;
-  }
-  Notification.requestPermission().then(() => {
-    updateNotificationStatus();
-    showToast('Notification permission updated');
-  });
-}
-
-function updateNotificationStatus() {
-  const el = document.getElementById('notif-status-chip');
-  if (!el) return;
-  const status = ('Notification' in window) ? Notification.permission : 'unsupported';
-  el.textContent = `permission: ${status}`;
-}
-
-function sendTestNotification() {
-  maybeNotify('CA Tracker', 'Notification setup is working.');
-  showToast('Test notification sent');
-}
-
-function saveReminderTime() {
-  const val = document.getElementById('daily-reminder-time')?.value || '19:00';
-  save('daily_reminder', val);
-  showToast('Reminder time saved');
-}
-
-function setupReminderLoop() {
-  if (reminderInterval) return;
-  reminderInterval = setInterval(() => {
-    const now = new Date();
-    const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    const today = now.toISOString().slice(0,10);
-    const marker = `reminded|${today}`;
-    if (hhmm === (state.daily_reminder || '19:00') && !state[marker]) {
-      save(marker, true);
-      maybeNotify('CA Final Reminder', 'Time for your study block.');
-    }
-  }, 30000);
-}
+// ── POMODORO ──────────────────────────────────────────────────────────────────
+let pomInterval=null, pomRemaining=25*60, pomActive=false, pomBreak=false, pomSessionsToday=0;
 
 function togglePomodoro() {
-  const t = timerState();
-  t.active = !t.active;
-  t.lastTick = Date.now();
-  persistTimerState();
-  if (t.active && !pomInterval) pomInterval = setInterval(tickPom, 1000);
+  if (pomActive) { clearInterval(pomInterval); pomInterval=null; pomActive=false; renderTimer(); return; }
+  pomActive=true;
+  pomInterval=setInterval(tickPom,1000);
   renderTimer();
 }
 function tickPom() {
-  const t = timerState();
-  if (!t.active) return;
-
-  const now = Date.now();
-  const elapsed = Math.floor((now - (t.lastTick || now)) / 1000);
-  if (elapsed <= 0) return;
-  t.lastTick = now;
-  t.remaining = Math.max(0, t.remaining - elapsed);
-
-  if (t.remaining<=0) {
-    t.active = false;
-    if (!t.breakMode) {
+  pomRemaining--;
+  if (pomRemaining<=0) {
+    clearInterval(pomInterval); pomInterval=null; pomActive=false;
+    if (!pomBreak) {
+      pomSessionsToday++;
       const today=new Date().toISOString().slice(0,10);
-      if (t.sessionsDate !== today) { t.sessionsDate = today; t.sessionsToday = 0; }
-      t.sessionsToday++;
-      setHours(today, Math.round((getHours(today)+(t.focusMin||25)/60)*10)/10);
+      setHours(today, Math.round((getHours(today)+25/60)*10)/10);
       setStudied(today,true);
-      t.breakMode=true;
-      t.remaining=(t.breakMin||5)*60;
-      showToast('Focus done. Break started.');
-      maybeNotify('Focus session complete', 'Take a short break.');
-      t.active = true;
-      t.lastTick = Date.now();
+      pomBreak=true; pomRemaining=5*60;
+      showToast('25 min session done! 5-min break. 🎯');
+      pomActive=true; pomInterval=setInterval(tickPom,1000);
     } else {
-      t.breakMode=false;
-      t.remaining=(t.focusMin||25)*60;
-      showToast('Break over. Back to focus.');
-      maybeNotify('Break complete', 'Back to your next focus block.');
+      pomBreak=false; pomRemaining=25*60;
+      showToast('Break over! Ready for next session.');
     }
-    persistTimerState();
   }
   renderTimer();
 }
 function resetPomodoro() {
-  const t = timerState();
-  t.active = false;
-  t.breakMode = false;
-  t.remaining = (t.focusMin||25)*60;
-  t.lastTick = 0;
-  persistTimerState();
+  clearInterval(pomInterval); pomInterval=null; pomActive=false; pomBreak=false; pomRemaining=25*60;
   renderTimer();
 }
-
-function skipPomodoro() {
-  const t = timerState();
-  t.active = false;
-  t.breakMode = !t.breakMode;
-  t.remaining = (t.breakMode ? (t.breakMin||5) : (t.focusMin||25)) * 60;
-  t.lastTick = 0;
-  persistTimerState();
-  renderTimer();
-}
-
-function saveTimerSettings() {
-  const t = timerState();
-  const focus = parseInt(document.getElementById('timer-focus-min')?.value || t.focusMin || 25, 10);
-  const brk = parseInt(document.getElementById('timer-break-min')?.value || t.breakMin || 5, 10);
-  t.focusMin = Math.max(10, Math.min(120, isNaN(focus)?25:focus));
-  t.breakMin = Math.max(3, Math.min(30, isNaN(brk)?5:brk));
-  t.active = false;
-  t.lastTick = 0;
-  t.remaining = (t.breakMode ? t.breakMin : t.focusMin) * 60;
-  persistTimerState();
-  renderTimer();
-  showToast('Timer settings updated');
-}
-
 function renderTimer() {
-  const t = timerState();
-  const m=String(Math.floor((t.remaining||0)/60)).padStart(2,'0');
-  const s=String((t.remaining||0)%60).padStart(2,'0');
-
-  const modalEl=document.getElementById('pomodoro-display');
-  const modalLb=document.getElementById('pomodoro-label');
-  const modalSb=document.getElementById('pom-start-btn');
-  const modalSc=document.getElementById('pom-sessions');
-  if (modalEl) modalEl.textContent=`${m}:${s}`;
-  if (modalLb) modalLb.textContent=t.breakMode?'Break':'Focus';
-  if (modalSb) modalSb.textContent=t.active?'Pause':'Start';
-  if (modalSc) modalSc.textContent=`${t.sessionsToday||0} sessions today`;
-
-  const viewMain=document.getElementById('timer-main');
-  const viewMode=document.getElementById('timer-mode');
-  const viewStart=document.getElementById('timer-start-btn');
-  const viewSessions=document.getElementById('timer-sessions-chip');
-  const viewFocus=document.getElementById('timer-focus-min');
-  const viewBreak=document.getElementById('timer-break-min');
-
-  if (viewMain) viewMain.textContent=`${m}:${s}`;
-  if (viewMode) viewMode.textContent=t.breakMode?'Break':'Focus';
-  if (viewStart) viewStart.textContent=t.active?'Pause':'Start';
-  if (viewSessions) viewSessions.textContent=`${t.sessionsToday||0} sessions today`;
-  if (viewFocus && document.activeElement !== viewFocus) viewFocus.value = t.focusMin || 25;
-  if (viewBreak && document.activeElement !== viewBreak) viewBreak.value = t.breakMin || 5;
-}
-
-function exportBackup() {
-  try {
-    const data = JSON.stringify(state, null, 2);
-    const blob = new Blob([data], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ca-tracker-backup-${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Backup exported');
-  } catch (e) {
-    showToast('Export failed');
-  }
-}
-
-function importBackup() {
-  const file = document.getElementById('import-backup-file')?.files?.[0];
-  if (!file) { showToast('Choose a JSON file first'); return; }
-  const fr = new FileReader();
-  fr.onload = () => {
-    try {
-      const parsed = JSON.parse(String(fr.result || '{}'));
-      state = parsed || {};
-      ensureDefaults();
-      writeLocalState();
-      if (firebaseReady && docRef) docRef.set(state, {merge:true});
-      renderAll();
-      showToast('Backup imported');
-    } catch (e) {
-      showToast('Invalid backup file');
-    }
-  };
-  fr.readAsText(file);
-}
-
-function resetTrackerData() {
-  if (!window.confirm('Reset all tracker data? This cannot be undone.')) return;
-  state = {};
-  ensureDefaults();
-  writeLocalState();
-  if (firebaseReady && docRef) docRef.set(state, {merge:false});
-  renderAll();
-  showToast('Tracker reset complete');
+  const el=document.getElementById('pomodoro-display');
+  const lb=document.getElementById('pomodoro-label');
+  const sb=document.getElementById('pom-start-btn');
+  const sc=document.getElementById('pom-sessions');
+  if (!el) return;
+  const m=String(Math.floor(pomRemaining/60)).padStart(2,'0');
+  const s=String(pomRemaining%60).padStart(2,'0');
+  el.textContent=`${m}:${s}`;
+  if (lb) lb.textContent=pomBreak?'Break':'Focus';
+  if (sb) sb.textContent=pomActive?'Pause':'Start';
+  if (sc) { const today=new Date().toISOString().slice(0,10); sc.textContent=`${pomSessionsToday} sessions today`; }
 }
 
 // ── RENDER — STATS ────────────────────────────────────────────────────────────
@@ -1445,7 +1076,7 @@ function openModal(sid,ci) {
   const ob=document.getElementById('m-open-chat');
   if (chatLink) {ob.href=chatLink;ob.style.display='inline-flex';} else ob.style.display='none';
 
-  renderTimer();
+  resetPomodoro();
   document.getElementById('modal-backdrop').classList.add('open');
 }
 
@@ -1501,6 +1132,7 @@ function copyPrompt() {
 function closeModal(e) { if(e.target===document.getElementById('modal-backdrop')) closeModalDirect(); }
 function closeModalDirect() {
   document.getElementById('modal-backdrop').classList.remove('open');
+  resetPomodoro();
   rebuildCurrent(); modalCtx=null;
 }
 
@@ -1519,12 +1151,6 @@ function rebuildCurrent() {
   if (currentView==='home') { updateStats(); }
   else if (currentView==='mocks') buildMocksView();
   else if (currentView==='notes') buildNotesView();
-  else if (currentView==='timer') { renderTimer(); }
-  else if (currentView==='settings') {
-    updateNotificationStatus();
-    const rem=document.getElementById('daily-reminder-time');
-    if (rem) rem.value=state.daily_reminder || '19:00';
-  }
   else if (SUBJECTS[currentView]) buildSubjectView(currentView);
 }
 
@@ -1536,13 +1162,10 @@ function showToast(msg) {
 }
 
 // ── RENDER ALL (called on Firebase sync) ────────────────────────────────────
-function renderAll() { rebuildCurrent(); updateStats(); renderTimer(); }
+function renderAll() { rebuildCurrent(); updateStats(); }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 initFirebase();
-setupReminderLoop();
-if (!pomInterval) pomInterval = setInterval(tickPom, 1000);
-window.addEventListener('beforeunload', () => { if (unsubscribe) unsubscribe(); });
 </script>
 </body>
 </html>
