@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CA Final Progress Tracker 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0e0e0f;
+  --bg2: #151517;
+  --bg3: #1c1c1f;
+  --text: #e8e6e1;
+  --text2: #9e9b94;
+  --accent: #c8b97a;
+  --green: #6aaa72;
+  --red: #c96a5a;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, var(--accent), #8fb88a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stats-bar {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  background: var(--bg2);
+  padding: 15px 25px;
+  border-radius: 8px;
+  text-align: center;
+  min-width: 150px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stat-label {
+  color: var(--text2);
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+  margin-top: 40px;
+}
+
+.subject-card {
+  background: var(--bg2);
+  border: 1px solid rgba(200, 185, 122, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.subject-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.subject-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.subject-progress {
+  color: var(--text2);
+  font-size: 0.9rem;
+}
+
+.progress-bar {
+  background: var(--bg3);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #8fb88a);
+  transition: width 0.3s ease;
+}
+
+.chapters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--bg3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.chapter-item:hover {
+  background: rgba(200, 185, 122, 0.1);
+  border-color: var(--accent);
+}
+
+.chapter-item.completed {
+  opacity: 0.6;
+}
+
+.chapter-item.completed .chapter-name {
+  text-decoration: line-through;
+  color: var(--green);
+}
+
+.chapter-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chapter-item.completed .chapter-checkbox {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.chapter-checkbox::after {
+  content: '';
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+}
+
+.chapter-item.completed .chapter-checkbox::after {
+  opacity: 1;
+}
+
+.chapter-name {
+  font-size: 0.9rem;
+  flex: 1;
+  color: var(--text);
+}
+
+.chapter-points {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 30px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--bg2);
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modal-content h2 {
+  color: var(--accent);
+  margin-bottom: 15px;
+}
+
+.modal-content p {
+  color: var(--text2);
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+.setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.setup-form input {
+  padding: 10px;
+  background: var(--bg3);
+  border: 1px solid rgba(200, 185, 122, 0.3);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.setup-form input::placeholder {
+  color: var(--text2);
+}
+
+.btn {
+  padding: 12px 24px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(200, 185, 122, 0.3);
+}
+
+.sync-status {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 16px;
+  background: var(--bg2);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--text2);
+  border: 1px solid rgba(200, 185, 122, 0.2);
+}
+
+.sync-status.synced {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.sync-status.syncing {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .subjects-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  .stats-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  animation: confetti-fall 3s ease-out forwards;
+}
+
+@keyframes confetti-fall {
+  to {
+    transform: translateY(100vh) rotateZ(360deg);
+    opacity: 0;
+  }
+}
+
+.reward-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg2);
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  z-index: 2000;
+  border: 2px solid var(--accent);
+  animation: reward-pop 0.5s ease-out;
+}
+
+@keyframes reward-pop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.reward-notification h3 {
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.reward-notification p {
+  color: var(--text2);
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>📚 CA Final Progress Tracker</h1>
+    <p style="color: var(--text2); margin-top: 10px;">Track your chapters, earn rewards, reach your goal</p>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-value" id="totalPoints">0</div>
+      <div class="stat-label">Total Points</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="chaptersCompleted">0</div>
+      <div class="stat-label">Chapters Completed</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="completionPercent">0%</div>
+      <div class="stat-label">Overall Progress</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="streak">0</div>
+      <div class="stat-label">Day Streak</div>
+    </div>
+  </div>
+
+  <div class="subjects-grid" id="subjectsGrid"></div>
+</div>
+
+<div id="setupModal" class="modal active">
+  <div class="modal-content">
+    <h2>🎯 Welcome to CA Tracker!</h2>
+    <p>First time here? Set up your profile to start tracking.</p>
+    <div class="setup-form">
+      <input type="text" id="userNameInput" placeholder="Enter your name" />
+      <input type="text" id="supabaseUrlInput" placeholder="Supabase Project URL" />
+      <input type="text" id="supabaseKeyInput" placeholder="Supabase anon public key" />
+      <button class="btn" onclick="setupUser()">Start Tracking</button>
+    </div>
+  </div>
+</div>
+
+<div class="sync-status" id="syncStatus">●</div>
+
+<script>
+// ====== CONFIG ======
+const CHAPTERS = {
+  'Direct Tax Laws': [
+    'Basic Concepts',
+    'Incomes which do not form part of Total Income',
+    'Profits and Gains of Business or Profession',
+    'Capital Gains',
+    'Income from Other Sources',
+    'Income of Other Persons included in Assessee\'s Total Income',
+    'Aggregation of Income, Set Off or Carry Forward of Losses',
+    'Deductions from Gross Total Income',
+    'Assessment of Various Entities',
+    'Assessment of Trusts and Institutions, Political Parties and Other Special Entities',
+    'Tax Planning, Tax Avoidance and Tax Evasion',
+    'Taxation of Digital Transactions',
+    'Deduction, Collection and Recovery of Tax',
+    'Income Tax Authorities',
+    'Assessment Procedure',
+    'Appeals and Revision',
+    'Dispute Resolution',
+    'Miscellaneous Provisions',
+    'Provisions to Counteract Unethical Tax Practices',
+    'Tax Audit and Ethical Compliances'
+  ],
+  'International Taxation': [
+    'Non Resident Taxation',
+    'Double Taxation Relief',
+    'Advance Rulings',
+    'Transfer Pricing',
+    'Fundamentals of BEPS',
+    'Application and Interpretation of Tax Treaties',
+    'Overview of Model Tax Conventions',
+    'Latest Developments in International Taxation'
+  ],
+  'Advanced Financial Management': [
+    'Financial Policy and Corporate Strategy',
+    'Risk Management',
+    'Advanced Capital Budgeting Decisions',
+    'Security Analysis',
+    'Security Valuation',
+    'Portfolio Management',
+    'Securitization',
+    'Mutual Funds',
+    'Derivatives Analysis and Valuation',
+    'Foreign Exchange Exposure and Risk Management',
+    'International Financial Management',
+    'Interest Rate Risk Management',
+    'Business Valuation',
+    'Mergers, Acquisitions and Corporate Restructuring',
+    'Startup Finance'
+  ],
+  'Financial Reporting': [
+    'Introduction to Indian Accounting Standards',
+    'Conceptual Framework for Financial Reporting under Ind AS',
+    'Ind AS 1 – Presentation of Financial Statements',
+    'Ind AS 34 – Interim Financial Reporting',
+    'Ind AS 7 – Statement of Cash Flows',
+    'Ind AS 8 – Accounting Policies, Changes in Accounting Estimates and Errors',
+    'Ind AS 10 – Events after the Reporting Period',
+    'Ind AS 113 – Fair Value Measurement',
+    'Ind AS 2 – Inventories',
+    'Ind AS 16 – Property, Plant and Equipment',
+    'Ind AS 23 – Borrowing Costs',
+    'Ind AS 36 – Impairment of Assets',
+    'Ind AS 38 – Intangible Assets',
+    'Ind AS 40 – Investment Property',
+    'Ind AS 105 – Non-current Assets Held for Sale and Discontinued Operations',
+    'Ind AS 116 – Leases',
+    'Ind AS 19 – Employee Benefits',
+    'Ind AS 37 – Provisions, Contingent Liabilities and Contingent Assets',
+    'Ind AS 12 – Income Taxes',
+    'Ind AS 21 – Effects of Changes in Foreign Exchange Rates',
+    'Ind AS 24 – Related Party Disclosures',
+    'Ind AS 33 – Earnings per Share',
+    'Ind AS 108 – Operating Segments',
+    'Ind AS 115 – Revenue from Contracts with Customers',
+    'Ind AS 41 – Agriculture',
+    'Ind AS 20 – Accounting for Government Grants and Disclosure of Government Assistance',
+    'Ind AS 102 – Share Based Payment',
+    'Financial Instruments: Scope and Definitions',
+    'Classification and Measurement of Financial Assets and Financial Liabilities',
+    'Financial Instruments: Equity and Financial Liabilities',
+    'Derivatives and Embedded Derivatives',
+    'Recognition and Derecognition of Financial Instruments',
+    'Hedge Accounting',
+    'Financial Instruments: Disclosures',
+    'Ind AS 103 – Business Combinations',
+    'Introduction to Consolidated and Separate Financial Statements',
+    'Important Definitions (Consolidation)',
+    'Consolidated Financial Statements',
+    'Ind AS 110 – Consolidation Procedure for Subsidiaries',
+    'Ind AS 111 – Joint Arrangements',
+    'Ind AS 28 – Investments in Associates and Joint Ventures',
+    'Ind AS 27 – Separate Financial Statements',
+    'Consolidation: Disclosures',
+    'Ind AS 101 – First-time Adoption of Ind AS',
+    'Analysis of Financial Statements',
+    'Professional and Ethical Duty of a Chartered Accountant',
+    'Accounting and Technology'
+  ],
+  'Indirect Tax Laws': [
+    'Supply under GST',
+    'Charge of GST',
+    'Place of Supply',
+    'Exemptions from GST',
+    'Time of Supply',
+    'Value of Supply',
+    'Input Tax Credit',
+    'Registration',
+    'Tax Invoice, Credit and Debit Notes',
+    'Accounts and Records; E-way Bill',
+    'Payment of Tax',
+    'Electronic Commerce Transactions',
+    'Returns',
+    'Import and Export Under GST',
+    'Refunds',
+    'Job Work',
+    'Assessment and Audit',
+    'Inspection, Search, Seizure and Arrest',
+    'Demands and Recovery',
+    'Liability to Pay in Certain Cases',
+    'Offences and Penalties and Ethical Aspects under GST',
+    'Appeals and Revision',
+    'Advance Ruling',
+    'Miscellaneous Provisions',
+    'Introduction to Customs Law',
+    'Levy and Exemptions from Customs Duty',
+    'Types of Duty',
+    'Classification of Imported and Export Goods',
+    'Valuation under the Customs Act, 1962',
+    'Importation and Exportation of Goods',
+    'Warehousing',
+    'Refund (Customs)',
+    'Introduction to FTP',
+    'Basic Concepts relating to Export Promotion Schemes under FTP'
+  ],
+  'Audit': [
+    'Quality Control',
+    'General Auditing Principles and Auditor\'s Responsibilities',
+    'Audit Planning, Strategy and Execution',
+    'Materiality, Risk Assessment and Internal Control',
+    'Audit Evidence',
+    'Completion and Review',
+    'Reporting',
+    'Specialised Areas',
+    'Related Services',
+    'Review of Financial Information',
+    'Prospective Financial Information and Other Assurance Services',
+    'Digital Auditing & Assurance',
+    'Group Audits',
+    'Special Features of Audit of Banks & Non-Banking Financial Companies',
+    'Overview of Audit of Public Sector Undertakings',
+    'Internal Audit',
+    'Due Diligence, Investigation & Forensic Accounting',
+    'Sustainable Development Goals (SDG) & Environment, Social and Governance (ESG) Assurance',
+    'Professional Ethics & Liabilities of Auditors'
+  ]
+};
+
+const TOTAL_CHAPTERS = Object.values(CHAPTERS).reduce((sum, arr) => sum + arr.length, 0);
+const POINTS_PER_CHAPTER = 10;
+
+// ====== STATE ======
+let userId = localStorage.getItem('userId');
+let supabaseUrl = localStorage.getItem('supabaseUrl');
+let supabaseKey = localStorage.getItem('supabaseKey');
+let supabaseReady = false;
+let localProgress = {};
+
+// ====== SUPABASE INIT ======
+async function initSupabase() {
+  if (!supabaseUrl || !supabaseKey) return;
+  
+  try {
+    // Test connection
+    const res = await fetch(`${supabaseUrl}/rest/v1/progress?select=count()`, {
+      headers: { 'apikey': supabaseKey }
+    });
+    supabaseReady = res.ok;
+    updateSyncStatus();
+    
+    if (supabaseReady) {
+      loadProgressFromSupabase();
+      subscribeToChanges();
+    }
+  } catch (e) {
+    console.warn('Supabase offline, using local cache');
+    updateSyncStatus();
+  }
+}
+
+async function loadProgressFromSupabase() {
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/progress?user_id=eq.${userId}`,
+      { headers: { 'apikey': supabaseKey } }
+    );
+    const data = await res.json();
+    
+    data.forEach(row => {
+      const key = `${row.subject}|${row.chapter_name}`;
+      localProgress[key] = row.completed;
+    });
+    
+    renderUI();
+  } catch (e) {
+    console.error('Failed to load progress:', e);
+  }
+}
+
+function subscribeToChanges() {
+  // Polling fallback for real-time (Supabase requires setup for WebSocket)
+  setInterval(loadProgressFromSupabase, 3000);
+}
+
+// ====== UI RENDERING ======
+function renderUI() {
+  const grid = document.getElementById('subjectsGrid');
+  grid.innerHTML = '';
+  
+  Object.entries(CHAPTERS).forEach(([subject, chapters]) => {
+    const completed = chapters.filter(ch => {
+      const key = `${subject}|${ch}`;
+      return localProgress[key];
+    }).length;
+    
+    const card = document.createElement('div');
+    card.className = 'subject-card';
+    
+    const progressPercent = Math.round((completed / chapters.length) * 100);
+    
+    card.innerHTML = `
+      <div class="subject-header">
+        <div class="subject-title">${subject}</div>
+        <div class="subject-progress">${completed}/${chapters.length}</div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: ${progressPercent}%"></div>
+      </div>
+      <div class="chapters-list">
+        ${chapters.map(ch => {
+          const key = `${subject}|${ch}`;
+          const isCompleted = localProgress[key];
+          return `
+            <div class="chapter-item ${isCompleted ? 'completed' : ''}" onclick="toggleChapter('${subject}', '${ch.replace(/'/g, "\\'")}')">
+              <div class="chapter-checkbox"></div>
+              <div class="chapter-name">${ch}</div>
+              <div class="chapter-points">+${POINTS_PER_CHAPTER}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    
+    grid.appendChild(card);
+  });
+  
+  updateStats();
+}
+
+function updateStats() {
+  const completed = Object.values(localProgress).filter(Boolean).length;
+  const totalPoints = completed * POINTS_PER_CHAPTER;
+  const completionPercent = Math.round((completed / TOTAL_CHAPTERS) * 100);
+  
+  document.getElementById('totalPoints').textContent = totalPoints;
+  document.getElementById('chaptersCompleted').textContent = completed;
+  document.getElementById('completionPercent').textContent = completionPercent + '%';
+  document.getElementById('streak').textContent = calculateStreak();
+}
+
+function calculateStreak() {
+  const lastStudy = localStorage.getItem('lastStudyDate');
+  const today = new Date().toDateString();
+  
+  if (lastStudy === today) {
+    return parseInt(localStorage.getItem('streak') || 1);
+  }
+  return 0;
+}
+
+// ====== CHAPTER TOGGLE ======
+async function toggleChapter(subject, chapter) {
+  const key = `${subject}|${chapter}`;
+  const wasCompleted = localProgress[key];
+  const newState = !wasCompleted;
+  
+  localProgress[key] = newState;
+  
+  // Update local cache
+  localStorage.setItem('progress', JSON.stringify(localProgress));
+  
+  // Update streak
+  const today = new Date().toDateString();
+  const lastStudy = localStorage.getItem('lastStudyDate');
+  if (lastStudy !== today) {
+    const currentStreak = parseInt(localStorage.getItem('streak') || 0) + 1;
+    localStorage.setItem('streak', currentStreak);
+    localStorage.setItem('lastStudyDate', today);
+  }
+  
+  // Show reward notification if completing chapter
+  if (newState && !wasCompleted) {
+    showReward(chapter);
+  }
+  
+  renderUI();
+  
+  // Sync to Supabase
+  if (supabaseReady) {
+    updateSupabase(subject, chapter, newState);
+  }
+}
+
+async function updateSupabase(subject, chapter, completed) {
+  updateSyncStatus(true);
+  
+  try {
+    const method = completed ? 'POST' : 'DELETE';
+    const body = completed ? 
+      JSON.stringify({ user_id: userId, subject, chapter_name: chapter, completed: true, completed_at: new Date().toISOString() }) :
+      null;
+    
+    const res = await fetch(`${supabaseUrl}/rest/v1/progress`, {
+      method: completed ? 'POST' : 'DELETE',
+      headers: {
+        'apikey': supabaseKey,
+        'Content-Type': 'application/json'
+      },
+      body: completed ? JSON.stringify({ user_id: userId, subject, chapter_name: chapter, completed: true, completed_at: new Date().toISOString() }) : null
+    });
+    
+    if (res.ok) {
+      updateSyncStatus();
+    }
+  } catch (e) {
+    console.warn('Failed to sync to Supabase:', e);
+    updateSyncStatus();
+  }
+}
+
+function showReward(chapter) {
+  const notification = document.createElement('div');
+  notification.className = 'reward-notification';
+  notification.innerHTML = `
+    <h3>🎉 Chapter Complete!</h3>
+    <p>+${POINTS_PER_CHAPTER} Points</p>
+    <p style="font-size: 0.85rem; margin-top: 10px;">${chapter}</p>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Confetti
+  for (let i = 0; i < 20; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = ['#c8b97a', '#8fb88a', '#5a8fc9'][Math.floor(Math.random() * 3)];
+    confetti.style.animationDelay = (Math.random() * 0.3) + 's';
+    document.body.appendChild(confetti);
+  }
+  
+  setTimeout(() => notification.remove(), 3000);
+}
+
+function updateSyncStatus(syncing = false) {
+  const status = document.getElementById('syncStatus');
+  if (syncing) {
+    status.textContent = '⟳ Syncing...';
+    status.className = 'sync-status syncing';
+  } else if (supabaseReady) {
+    status.textContent = '✓ Synced';
+    status.className = 'sync-status synced';
+  } else {
+    status.textContent = '⊕ Local Only';
+    status.className = 'sync-status';
+  }
+}
+
+// ====== SETUP ======
+function setupUser() {
+  const name = document.getElementById('userNameInput').value;
+  const url = document.getElementById('supabaseUrlInput').value;
+  const key = document.getElementById('supabaseKeyInput').value;
+  
+  if (!name || !url || !key) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  userId = name.replace(/\s+/g, '_').toLowerCase();
+  supabaseUrl = url;
+  supabaseKey = key;
+  
+  localStorage.setItem('userId', userId);
+  localStorage.setItem('supabaseUrl', supabaseUrl);
+  localStorage.setItem('supabaseKey', supabaseKey);
+  
+  document.getElementById('setupModal').classList.remove('active');
+  
+  initSupabase();
+  renderUI();
+}
+
+// ====== INIT ======
+document.addEventListener('DOMContentLoaded', () => {
+  localProgress = JSON.parse(localStorage.getItem('progress') || '{}');
+  
+  if (userId && supabaseUrl && supabaseKey) {
+    document.getElementById('setupModal').classList.remove('active');
+    initSupabase();
+  }
+  
+  renderUI();
+});
+</script>
+
+</body>
+</html>
