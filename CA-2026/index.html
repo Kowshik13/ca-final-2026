@@ -198,62 +198,6 @@ h1 {
   min-width: 30px;
 }
 
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal.active {
-  display: flex;
-}
-
-.modal-content {
-  background: var(--bg2);
-  padding: 30px;
-  border-radius: 12px;
-  max-width: 400px;
-  text-align: center;
-}
-
-.modal-content h2 {
-  color: var(--accent);
-  margin-bottom: 15px;
-}
-
-.modal-content p {
-  color: var(--text2);
-  margin-bottom: 20px;
-  font-size: 0.95rem;
-}
-
-.setup-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.setup-form input {
-  padding: 10px;
-  background: var(--bg3);
-  border: 1px solid rgba(200, 185, 122, 0.3);
-  border-radius: 6px;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 0.95rem;
-}
-
-.setup-form input::placeholder {
-  color: var(--text2);
-}
-
 .btn {
   padding: 12px 24px;
   background: var(--accent);
@@ -388,23 +332,11 @@ h1 {
   <div class="subjects-grid" id="subjectsGrid"></div>
 </div>
 
-<div id="setupModal" class="modal active">
-  <div class="modal-content">
-    <h2>🎯 Welcome to CA Tracker!</h2>
-    <p>First time here? Set up your profile to start tracking.</p>
-    <div class="setup-form">
-      <input type="text" id="userNameInput" placeholder="Enter your name" />
-      <input type="text" id="supabaseUrlInput" placeholder="Supabase Project URL" />
-      <input type="text" id="supabaseKeyInput" placeholder="Supabase anon public key" />
-      <button class="btn" onclick="setupUser()">Start Tracking</button>
-    </div>
-  </div>
-</div>
-
 <div class="sync-status" id="syncStatus">●</div>
 
 <script>
 // ====== CONFIG ======
+const DEFAULT_USER_ID = 'koushika_2026';
 const DEFAULT_SUPABASE_URL = 'https://qcgggntrhtfkjglxnbgi.supabase.co';
 const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjZ2dnbnRyaHRma2pnbHhuYmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTM3NTgsImV4cCI6MjA5MTA2OTc1OH0.3ovqqIAGDpg-tHig-kddy5fa0PIgtLttkfhBqI7prAk';
 const CHAPTERS = {
@@ -569,11 +501,21 @@ const TOTAL_CHAPTERS = Object.values(CHAPTERS).reduce((sum, arr) => sum + arr.le
 const POINTS_PER_CHAPTER = 10;
 
 // ====== STATE ======
-let userId = localStorage.getItem('userId');
+let userId = localStorage.getItem('userId') || DEFAULT_USER_ID;
 let supabaseUrl = localStorage.getItem('supabaseUrl') || DEFAULT_SUPABASE_URL;
 let supabaseKey = localStorage.getItem('supabaseKey') || DEFAULT_SUPABASE_KEY;
 let supabaseReady = false;
 let localProgress = {};
+
+function getSupabaseHeaders(includeJson = false, includeUpsert = false) {
+  const headers = {
+    'apikey': supabaseKey,
+    'Authorization': `Bearer ${supabaseKey}`
+  };
+  if (includeJson) headers['Content-Type'] = 'application/json';
+  if (includeUpsert) headers['Prefer'] = 'resolution=merge-duplicates,return=minimal';
+  return headers;
+}
 
 // ====== SUPABASE INIT ======
 async function initSupabase() {
@@ -582,7 +524,7 @@ async function initSupabase() {
   try {
     // Test connection
     const res = await fetch(`${supabaseUrl}/rest/v1/progress?select=count()`, {
-      headers: { 'apikey': supabaseKey }
+      headers: getSupabaseHeaders()
     });
     supabaseReady = res.ok;
     updateSyncStatus();
@@ -600,9 +542,10 @@ async function initSupabase() {
 async function loadProgressFromSupabase() {
   try {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/progress?user_id=eq.${userId}`,
-      { headers: { 'apikey': supabaseKey } }
+      `${supabaseUrl}/rest/v1/progress?select=subject,chapter_name,completed&user_id=eq.${encodeURIComponent(userId)}`,
+      { headers: getSupabaseHeaders() }
     );
+    if (!res.ok) return;
     const data = await res.json();
     
     data.forEach(row => {
@@ -724,25 +667,35 @@ async function updateSupabase(subject, chapter, completed) {
   updateSyncStatus(true);
   
   try {
-    const method = completed ? 'POST' : 'DELETE';
-    const body = completed ? 
-      JSON.stringify({ user_id: userId, subject, chapter_name: chapter, completed: true, completed_at: new Date().toISOString() }) :
-      null;
-    
-    const res = await fetch(`${supabaseUrl}/rest/v1/progress`, {
+    const endpoint = completed
+      ? `${supabaseUrl}/rest/v1/progress?on_conflict=user_id,subject,chapter_name`
+      : `${supabaseUrl}/rest/v1/progress?user_id=eq.${encodeURIComponent(userId)}&subject=eq.${encodeURIComponent(subject)}&chapter_name=eq.${encodeURIComponent(chapter)}`;
+
+    const res = await fetch(endpoint, {
       method: completed ? 'POST' : 'DELETE',
-      headers: {
-        'apikey': supabaseKey,
-        'Content-Type': 'application/json'
-      },
-      body: completed ? JSON.stringify({ user_id: userId, subject, chapter_name: chapter, completed: true, completed_at: new Date().toISOString() }) : null
+      headers: completed
+        ? getSupabaseHeaders(true, true)
+        : getSupabaseHeaders(),
+      body: completed
+        ? JSON.stringify({
+            user_id: userId,
+            subject,
+            chapter_name: chapter,
+            completed: true,
+            completed_at: new Date().toISOString()
+          })
+        : null
     });
     
     if (res.ok) {
       updateSyncStatus();
+      return;
     }
+    supabaseReady = false;
+    updateSyncStatus();
   } catch (e) {
     console.warn('Failed to sync to Supabase:', e);
+    supabaseReady = false;
     updateSyncStatus();
   }
 }
@@ -785,41 +738,15 @@ function updateSyncStatus(syncing = false) {
   }
 }
 
-// ====== SETUP ======
-function setupUser() {
-  const name = document.getElementById('userNameInput').value;
-  const url = document.getElementById('supabaseUrlInput').value || DEFAULT_SUPABASE_URL;
-  const key = document.getElementById('supabaseKeyInput').value || DEFAULT_SUPABASE_KEY;
-  
-  if (!name || !url || !key) {
-    alert('Please fill in all fields');
-    return;
-  }
-  
-  userId = name.replace(/\s+/g, '_').toLowerCase();
-  supabaseUrl = url;
-  supabaseKey = key;
-  
-  localStorage.setItem('userId', userId);
-  localStorage.setItem('supabaseUrl', supabaseUrl);
-  localStorage.setItem('supabaseKey', supabaseKey);
-  
-  document.getElementById('setupModal').classList.remove('active');
-  
-  initSupabase();
-  renderUI();
-}
-
 // ====== INIT ======
 document.addEventListener('DOMContentLoaded', () => {
   localProgress = JSON.parse(localStorage.getItem('progress') || '{}');
-  document.getElementById('supabaseUrlInput').value = supabaseUrl;
-  document.getElementById('supabaseKeyInput').value = supabaseKey;
-  
-  if (userId && supabaseUrl && supabaseKey) {
-    document.getElementById('setupModal').classList.remove('active');
-    initSupabase();
-  }
+
+  localStorage.setItem('userId', userId);
+  localStorage.setItem('supabaseUrl', supabaseUrl);
+  localStorage.setItem('supabaseKey', supabaseKey);
+
+  initSupabase();
   
   renderUI();
 });
