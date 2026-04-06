@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Koushika — CA Final 2026</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -686,7 +685,6 @@ let docRef = null;
 let unsubscribe = null;
 let noteDebounce = {};
 let pendingCloudWrites = {};
-let cloudUid = null;
 
 function ensureDefaults() {
   if (!state || typeof state !== 'object') state = {};
@@ -751,7 +749,7 @@ function flushPendingCloudWrites() {
 
 function bindFirestoreSync(db) {
   docRef = db.collection(FIREBASE_COLLECTION).doc(FIREBASE_DOC);
-  setSyncStatus(false, cloudUid ? 'auth ok · connecting…' : 'connecting…');
+  setSyncStatus(false, 'connecting…');
 
   if (unsubscribe) {
     try { unsubscribe(); } catch (e) {}
@@ -777,7 +775,11 @@ function bindFirestoreSync(db) {
     renderAll();
   }, err => {
     console.error('Firestore error:', err);
-    setSyncStatus(false, 'offline — local save');
+    if (err && err.code === 'permission-denied') {
+      setSyncStatus(false, 'cloud rules blocked');
+    } else {
+      setSyncStatus(false, 'offline — local save');
+    }
     loadLocal();
   });
 }
@@ -801,25 +803,8 @@ function initFirebase() {
       });
     }
 
-    // Sign in anonymously for projects with auth-required Firestore rules.
-    if (firebase.auth) {
-      setSyncStatus(false, 'authenticating…');
-      firebase.auth().onAuthStateChanged(user => {
-        if (user) {
-          cloudUid = user.uid || null;
-          bindFirestoreSync(db);
-          return;
-        }
-
-        firebase.auth().signInAnonymously().catch(err => {
-          console.error('Anonymous auth failed:', err);
-          // Continue without auth; may still work for public rules.
-          bindFirestoreSync(db);
-        });
-      });
-    } else {
-      bindFirestoreSync(db);
-    }
+    // No authentication flow: sync directly to shared Firestore document.
+    bindFirestoreSync(db);
   } catch(e) {
     console.error('Firebase init failed:', e);
     setSyncStatus(false, 'local only');
