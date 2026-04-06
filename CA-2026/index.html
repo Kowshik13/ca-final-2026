@@ -1,1082 +1,1709 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CA Final Progress Tracker 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Koushika ΓÇö CA Final 2026</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg: #0e0e0f;
-  --bg2: #151517;
-  --bg3: #1c1c1f;
-  --text: #e8e6e1;
-  --text2: #9e9b94;
-  --accent: #c8b97a;
-  --accent2: #8fb88a;
-  --green: #6aaa72;
-  --red: #c96a5a;
+  --bg:    #0e0e0f; --bg2: #151517; --bg3: #1c1c1f; --bg4: #242428;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+  --text: #e8e6e1; --text2: #9e9b94; --text3: #5c5a55;
+  --accent: #c8b97a; --accent2: #8fb88a;
+  --red: #c96a5a; --amber: #c9914a; --green: #6aaa72; --blue: #5a8fc9;
+  --fr:#5a8fc9; --afm:#8a6ac9; --audit:#c96a7a; --dt:#c9914a; --idt:#6aaa72; --ibs:#4ab8c9;
+  --p1:#5a8fc9; --p2:#8a6ac9; --p3:#c9914a; --p4:#6aaa72;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;font-weight:400;min-height:100vh;line-height:1.5;}
+.shell{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:228px;min-width:228px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.logo{padding:24px 20px 18px;border-bottom:1px solid var(--border);}
+.logo-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--accent);line-height:1.3;}
+.logo-sub{font-size:10px;color:var(--text3);margin-top:3px;font-family:'DM Mono',monospace;letter-spacing:.05em;}
+.sync-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--text3);margin-right:5px;vertical-align:middle;}
+.sync-dot.live{background:var(--green);box-shadow:0 0 5px var(--green);}
+.nav{padding:14px 10px;flex:1;}
+.nav-section{margin-bottom:18px;}
+.nav-label{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;padding:0 10px;margin-bottom:5px;}
+.nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:7px;border:none;background:transparent;color:var(--text2);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;text-align:left;transition:all .14s;margin-bottom:1px;}
+.nav-btn:hover{background:var(--bg3);color:var(--text);}
+.nav-btn.active{background:var(--bg4);color:var(--text);}
+.nav-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.nav-count{margin-left:auto;font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);}
+.nav-health{margin-left:auto;width:7px;height:7px;border-radius:50%;}
+.sidebar-footer{padding:14px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);}
+.overall-pct{font-family:'DM Mono',monospace;font-size:22px;color:var(--accent);font-weight:500;}
+
+/* MAIN */
+.main{flex:1;padding:36px 44px;overflow-x:hidden;min-width:0;}
+.view{display:none;}
+.view.active{display:block;animation:fadeIn .18s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.page-heading{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);margin-bottom:3px;letter-spacing:-.01em;}
+.page-sub{font-size:13px;color:var(--text2);margin-bottom:28px;}
+
+/* PHASE TIMELINE */
+.phase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;}
+.phase-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;transition:border-color .15s;}
+.phase-card.current{border-color:var(--border2);}
+.phase-card-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.phase-badge{font-size:9px;font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:4px;font-weight:500;}
+.phase-current-tag{font-size:9px;color:var(--accent);font-family:'DM Mono',monospace;letter-spacing:.05em;margin-left:auto;}
+.phase-label{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.phase-range{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:10px;}
+.phase-bar-track{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-bottom:6px;}
+.phase-bar-fill{height:100%;border-radius:2px;transition:width .5s ease;}
+.phase-pct{font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);}
+
+/* STATS GRID */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:16px 18px;}
+.stat-label{font-size:10px;color:var(--text3);margin-bottom:5px;letter-spacing:.03em;}
+.stat-val{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);}
+.stat-unit{font-size:11px;color:var(--text2);margin-top:1px;}
+.stat-good{color:var(--green);}
+
+/* TODAY'S FOCUS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
+.focus-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+.focus-card h3{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;}
+.focus-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.focus-item:last-child{border-bottom:none;}
+.focus-subj-tag{font-size:9px;font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;flex-shrink:0;margin-top:2px;}
+.focus-ch{font-size:12px;color:var(--text);line-height:1.4;}
+.focus-ms{font-size:10px;color:var(--text3);margin-top:2px;}
+.focus-empty{font-size:13px;color:var(--text3);padding:16px 0;text-align:center;}
+
+/* HOURS LOG */
+.hours-week{display:flex;gap:6px;align-items:flex-end;}
+.hours-day{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.hours-bar-wrap{width:100%;background:var(--bg4);border-radius:4px;overflow:hidden;height:48px;display:flex;align-items:flex-end;}
+.hours-bar{width:100%;background:rgba(200,185,122,0.4);border-radius:4px;transition:height .3s;min-height:0;}
+.hours-bar.today-bar{background:var(--accent);}
+.hours-dn{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;}
+.hours-num{font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;cursor:pointer;padding:2px 0;}
+.hours-num:hover{color:var(--text);}
+.hours-avg{font-size:11px;color:var(--text3);margin-top:10px;font-family:'DM Mono',monospace;}
+
+/* HEATMAP */
+.heatmap-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:24px;}
+.heatmap-wrap h3{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;}
+.heatmap-grid{display:flex;flex-wrap:wrap;gap:3px;}
+.hm-cell{width:12px;height:12px;border-radius:2px;background:var(--bg4);cursor:default;flex-shrink:0;transition:opacity .1s;}
+.hm-cell:hover{opacity:.75;}
+.hm-1{background:rgba(200,185,122,.25);}
+.hm-2{background:rgba(200,185,122,.45);}
+.hm-3{background:rgba(200,185,122,.65);}
+.hm-4{background:rgba(200,185,122,.85);}
+.hm-5{background:var(--accent);}
+.hm-legend{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:10px;color:var(--text3);}
+.hm-leg-cell{width:10px;height:10px;border-radius:2px;}
+
+/* SUBJECT VIEW */
+.subj-header-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.subj-name-big{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;}
+.subj-bar-track{flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;}
+.subj-bar-fill{height:100%;border-radius:2px;transition:width .4s ease;}
+.subj-pct{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);min-width:32px;text-align:right;}
+.chapters-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(244px,1fr));gap:8px;margin-bottom:32px;}
+.ch-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:13px 15px;cursor:pointer;transition:all .14s;position:relative;overflow:hidden;}
+.ch-card:hover{background:var(--bg3);border-color:var(--border2);transform:translateY(-1px);}
+.ch-card-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:7px;line-height:1.4;padding-left:4px;}
+.ch-card-meta{font-size:11px;color:var(--text3);margin-bottom:8px;padding-left:4px;line-height:1.5;}
+.milestones-row{display:flex;gap:3px;margin-bottom:8px;}
+.ms-pip{height:4px;flex:1;border-radius:2px;background:var(--bg4);transition:background .2s;}
+.clarity-row{display:flex;align-items:center;gap:5px;margin-bottom:8px;padding-left:4px;}
+.cl-dot{width:8px;height:8px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);}
+.clarity-text{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-left:3px;}
+.ch-actions{display:flex;gap:5px;}
+.ch-btn{font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .12s;white-space:nowrap;}
+.ch-btn:hover{background:var(--bg4);color:var(--text);}
+.ch-btn.primary{background:var(--bg4);color:var(--accent);border-color:rgba(200,185,122,.25);}
+.ch-btn.primary:hover{background:rgba(200,185,122,.1);}
+.ch-btn.has-chat{color:var(--green);border-color:rgba(106,170,114,.3);}
+.health-chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;border-radius:5px;font-family:'DM Mono',monospace;margin-bottom:12px;}
+.health-g{background:rgba(106,170,114,.12);color:var(--green);}
+.health-a{background:rgba(201,145,74,.12);color:var(--amber);}
+.health-r{background:rgba(201,106,90,.12);color:var(--red);}
+
+/* MODAL */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;align-items:center;justify-content:center;}
+.modal-backdrop.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:600px;max-width:96vw;max-height:92vh;overflow-y:auto;padding:26px 30px;position:relative;}
+.modal-header{margin-bottom:18px;}
+.modal-subj-label{font-size:11px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);line-height:1.3;}
+.modal-section{margin-bottom:18px;}
+.modal-sec-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:9px;}
+.milestone-toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.ms-toggle{display:flex;align-items:center;gap:7px;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;transition:all .12s;}
+.ms-toggle:hover{border-color:var(--border2);}
+.ms-toggle.done{border-color:rgba(106,170,114,.4);background:rgba(106,170,114,.06);}
+.ms-check{width:17px;height:17px;border-radius:5px;border:1px solid var(--border2);background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;}
+.ms-toggle.done .ms-check{background:var(--green);border-color:var(--green);}
+.ms-toggle-name{font-size:12px;color:var(--text2);}
+.ms-toggle.done .ms-toggle-name{color:var(--text);}
+.clarity-selector{display:flex;gap:7px;flex-wrap:wrap;}
+.cl-option{padding:6px 13px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;transition:all .12s;}
+.cl-option:hover{border-color:var(--border2);}
+.cl-option.active-1{border-color:var(--red);color:var(--red);background:rgba(201,106,90,.08);}
+.cl-option.active-2,.cl-option.active-3{border-color:var(--amber);color:var(--amber);background:rgba(201,145,74,.08);}
+.cl-option.active-4,.cl-option.active-5{border-color:var(--green);color:var(--green);background:rgba(106,170,114,.08);}
+.prompt-box{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:13px 15px;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text2);line-height:1.6;cursor:pointer;transition:border-color .12s;user-select:all;white-space:pre-wrap;}
+.prompt-box:hover{border-color:var(--border2);}
+.chat-link-row{display:flex;gap:7px;align-items:center;}
+.chat-link-input{flex:1;padding:8px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border-color .12s;}
+.chat-link-input:focus{border-color:var(--border2);}
+.chat-link-input::placeholder{color:var(--text3);}
+.save-btn{padding:8px 13px;border-radius:8px;border:1px solid var(--border2);background:var(--bg4);color:var(--text);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:all .12s;white-space:nowrap;}
+.save-btn:hover{background:var(--bg3);}
+.open-chat-btn{padding:8px 13px;border-radius:8px;border:1px solid rgba(106,170,114,.4);background:rgba(106,170,114,.08);color:var(--green);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:all .12s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.modal-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.modal-close:hover{color:var(--text);border-color:var(--border2);}
+
+/* POMODORO */
+.pomodoro-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.pom-display{font-family:'DM Mono',monospace;font-size:28px;color:var(--text);letter-spacing:.05em;}
+.pom-label{font-size:10px;color:var(--text3);margin-top:1px;font-family:'DM Mono',monospace;}
+.pom-btns{display:flex;gap:6px;}
+.pom-btn{padding:7px 12px;border-radius:7px;border:1px solid var(--border2);background:var(--bg4);color:var(--text2);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .12s;}
+.pom-btn:hover{color:var(--text);background:var(--bg3);}
+.pom-btn.start{border-color:rgba(200,185,122,.3);color:var(--accent);}
+.pom-session-count{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
+
+/* MOCK TRACKER */
+.mock-round-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px;}
+.mock-round-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.mock-round-name{font-size:14px;font-weight:500;color:var(--text);}
+.mock-agg{font-family:'DM Mono',monospace;font-size:13px;margin-left:auto;}
+.mock-pass{color:var(--green);}
+.mock-fail{color:var(--red);}
+.mock-table{width:100%;border-collapse:collapse;}
+.mock-table th{font-size:10px;color:var(--text3);text-align:left;padding:4px 8px;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.mock-table td{padding:7px 8px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.mock-table tr:last-child td{border-bottom:none;}
+.score-input{width:52px;padding:4px 7px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;text-align:center;transition:border-color .12s;}
+.score-input:focus{border-color:var(--border2);}
+.pass-pill{font-size:10px;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace;}
+.pass-pill.pass{background:rgba(106,170,114,.15);color:var(--green);}
+.pass-pill.fail{background:rgba(201,106,90,.15);color:var(--red);}
+.pass-pill.na{background:var(--bg4);color:var(--text3);}
+.mock-add-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;border:1px dashed var(--border2);background:transparent;color:var(--text3);font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .14s;margin-bottom:20px;}
+.mock-add-btn:hover{color:var(--text);border-color:var(--accent);color:var(--accent);}
+
+/* NOTES */
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;}
+.note-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:15px;}
+.note-ch{font-size:12px;font-weight:500;color:var(--text);margin-bottom:7px;}
+.note-textarea{width:100%;min-height:76px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:9px 11px;color:var(--text2);font-size:12px;font-family:'Outfit',sans-serif;resize:vertical;outline:none;line-height:1.6;transition:border-color .12s;}
+.note-textarea:focus{border-color:var(--border2);}
+.note-textarea::placeholder{color:var(--text3);}
+
+/* MISC */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:9px 18px;border-radius:9px;font-size:13px;opacity:0;transition:all .2s;z-index:999;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px;}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+.btn-row{display:flex;gap:8px;margin-bottom:20px;}
+.action-btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .12s;}
+.action-btn:hover{background:var(--bg4);color:var(--text);}
+.action-btn.accent{border-color:rgba(200,185,122,.3);color:var(--accent);background:rgba(200,185,122,.06);}
+.streak-row{display:flex;align-items:center;gap:16px;padding:14px 0;}
+.streak-num{font-family:'DM Serif Display',serif;font-size:32px;color:var(--accent);}
+.streak-label{font-size:12px;color:var(--text3);}
+.velocity-row{display:flex;gap:20px;margin-top:10px;}
+.vel-item{display:flex;flex-direction:column;gap:2px;}
+.vel-val{font-family:'DM Mono',monospace;font-size:15px;color:var(--text);}
+.vel-label{font-size:10px;color:var(--text3);}
+
+/* TIMER + SETTINGS */
+.panel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.panel-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.panel-title{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+.timer-main{font-family:'DM Mono',monospace;font-size:46px;letter-spacing:.04em;line-height:1;color:var(--text);margin-bottom:12px;}
+.timer-sub{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:10px;}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.chip{font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;border:1px solid var(--border);padding:3px 8px;border-radius:999px;background:var(--bg3);}
+.input-sm{padding:7px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;max-width:110px;}
+.input-sm:focus{border-color:var(--border2);}
+.helper{font-size:11px;color:var(--text3);margin-top:8px;}
+.sync-note{font-size:10px;color:var(--text3);margin-top:8px;font-family:'DM Mono',monospace;}
+
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+  .main { padding: 24px 24px; }
+  .phase-grid, .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .panel-grid { grid-template-columns: 1fr; }
 }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Outfit', sans-serif;
-  min-height: 100vh;
-  padding: 20px;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.companion-panel {
-  background: var(--bg2);
-  border: 1px solid rgba(200, 185, 122, 0.25);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
-
-.companion-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.companion-item {
-  background: var(--bg3);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 10px;
-  padding: 12px;
-}
-
-.companion-label {
-  color: var(--text2);
-  font-size: 0.8rem;
-  margin-bottom: 6px;
-}
-
-.companion-value {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.phase-text {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.muted-hero {
-  color: var(--text2);
-  margin-top: 10px;
-}
-
-.resources-row {
-  margin-top: 10px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.resource-link {
-  color: var(--accent);
-  text-decoration: none;
-  border: 1px solid rgba(200,185,122,0.35);
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 0.78rem;
-}
-
-.resource-link:hover {
-  background: rgba(200,185,122,0.1);
-}
-
-.focus-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.mini-btn {
-  border: 1px solid rgba(200, 185, 122, 0.35);
-  background: transparent;
-  color: var(--accent);
-  padding: 6px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.82rem;
-}
-
-.mini-btn:hover {
-  background: rgba(200, 185, 122, 0.12);
-}
-
-.badges-wrap {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-
-.badge-chip {
-  font-size: 0.75rem;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: var(--bg3);
-  color: var(--text2);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.badge-chip.unlocked {
-  color: var(--bg);
-  background: var(--accent2, #8fb88a);
-  border-color: transparent;
-  font-weight: 700;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-  background: linear-gradient(135deg, var(--accent), #8fb88a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.stats-bar {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
-}
-
-.stat {
-  background: var(--bg2);
-  padding: 15px 25px;
-  border-radius: 8px;
-  text-align: center;
-  min-width: 150px;
-}
-
-.stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.stat-label {
-  color: var(--text2);
-  font-size: 0.9rem;
-  margin-top: 5px;
-}
-
-.subjects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
-  margin-top: 40px;
-}
-
-.subject-card {
-  background: var(--bg2);
-  border: 1px solid rgba(200, 185, 122, 0.2);
-  border-radius: 12px;
-  padding: 20px;
-}
-
-.subject-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.subject-title {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--accent);
-}
-
-.subject-progress {
-  color: var(--text2);
-  font-size: 0.9rem;
-}
-
-.progress-bar {
-  background: var(--bg3);
-  height: 8px;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 15px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), #8fb88a);
-  transition: width 0.3s ease;
-}
-
-.chapters-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.chapter-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: var(--bg3);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-}
-
-.chapter-item:hover {
-  background: rgba(200, 185, 122, 0.1);
-  border-color: var(--accent);
-}
-
-.chapter-item.completed {
-  opacity: 0.6;
-}
-
-.chapter-item.completed .chapter-name {
-  text-decoration: line-through;
-  color: var(--green);
-}
-
-.chapter-checkbox {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--accent);
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.chapter-item.completed .chapter-checkbox {
-  background: var(--green);
-  border-color: var(--green);
-}
-
-.chapter-checkbox::after {
-  content: '';
-  width: 4px;
-  height: 8px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  opacity: 0;
-}
-
-.chapter-item.completed .chapter-checkbox::after {
-  opacity: 1;
-}
-
-.chapter-name {
-  font-size: 0.9rem;
-  flex: 1;
-  color: var(--text);
-}
-
-.chapter-points {
-  color: var(--accent);
-  font-size: 0.8rem;
-  font-weight: 600;
-  min-width: 30px;
-}
-
-.chapter-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn {
-  padding: 12px 24px;
-  background: var(--accent);
-  color: var(--bg);
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(200, 185, 122, 0.3);
-}
-
-.sync-status {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 12px 16px;
-  background: var(--bg2);
-  border-radius: 6px;
-  font-size: 0.85rem;
-  color: var(--text2);
-  border: 1px solid rgba(200, 185, 122, 0.2);
-}
-
-.sync-status.synced {
-  color: var(--green);
-  border-color: var(--green);
-}
-
-.sync-status.syncing {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-@media (max-width: 768px) {
-  body {
-    padding: 12px;
+@media (max-width: 760px) {
+  .shell { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
   }
-
-  .container {
-    max-width: 100%;
+  .logo { padding: 16px 14px 12px; }
+  .nav { padding: 10px; }
+  .nav-section {
+    margin-bottom: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px;
   }
-
-  .companion-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .subjects-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    margin-top: 18px;
-  }
-  
-  h1 {
-    font-size: 1.8rem;
-  }
-  
-  .stats-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .stat {
-    padding: 12px 14px;
-  }
-
-  .subject-card {
-    padding: 14px;
-  }
-
-  .chapter-item {
-    padding: 9px;
-  }
-
-  .sync-status {
-    right: 12px;
-    bottom: 12px;
-    font-size: 0.78rem;
-    padding: 8px 10px;
-  }
+  .sidebar-footer { padding: 12px 14px; }
+  .main { padding: 16px 12px 22px; }
+  .page-heading { font-size: 24px; }
+  .page-sub { margin-bottom: 18px; }
+  .phase-grid, .stats-row, .chapters-grid, .notes-grid { grid-template-columns: 1fr; }
+  .mock-round-card { overflow-x: auto; }
+  .mock-table { min-width: 520px; }
+  .modal { width: 94vw; padding: 18px 16px; border-radius: 12px; }
+  .milestone-toggles { grid-template-columns: repeat(2, 1fr); }
+  .chat-link-row { flex-wrap: wrap; }
+  .chat-link-input { min-width: 100%; }
+  .open-chat-btn, .save-btn { width: 100%; justify-content: center; }
 }
 
-@media (max-width: 480px) {
-  .companion-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.confetti {
-  position: fixed;
-  width: 10px;
-  height: 10px;
-  pointer-events: none;
-  animation: confetti-fall 3s ease-out forwards;
-}
-
-@keyframes confetti-fall {
-  to {
-    transform: translateY(100vh) rotateZ(360deg);
-    opacity: 0;
-  }
-}
-
-.reward-notification {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--bg2);
-  padding: 30px;
-  border-radius: 12px;
-  text-align: center;
-  z-index: 2000;
-  border: 2px solid var(--accent);
-  animation: reward-pop 0.5s ease-out;
-}
-
-@keyframes reward-pop {
-  0% {
-    transform: translate(-50%, -50%) scale(0.5);
-    opacity: 0;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-}
-
-.reward-notification h3 {
-  color: var(--accent);
-  margin-bottom: 10px;
-}
-
-.reward-notification p {
-  color: var(--text2);
-}
-
-.reward-meta {
-  font-size: 0.85rem;
-  margin-top: 10px;
+@media (max-width: 460px) {
+  .milestone-toggles { grid-template-columns: 1fr; }
+  .stat-val { font-size: 22px; }
+  .pom-display { font-size: 24px; }
 }
 </style>
 </head>
 <body>
+<div class="shell">
 
-<div class="container">
-  <header>
-    <h1>📚 CA Final Progress Tracker</h1>
-    <p class="muted-hero">Track your chapters, earn rewards, reach your goal</p>
-    <div class="resources-row">
-      <a class="resource-link" href="AFM%2010%20Exam%20Oriented_Table%20of%20Contents_Concepts%20.pdf" target="_blank" rel="noopener noreferrer">AFM Chapter PDF</a>
-      <a class="resource-link" href="FR%2010%20Exam%20Oriented_Table%20of%20Contents_Concepts.pdf" target="_blank" rel="noopener noreferrer">FR Chapter PDF</a>
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-title">CA Final<br>Study Hub</div>
+    <div class="logo-sub" style="margin-top:6px"><span class="sync-dot" id="sync-dot"></span><span id="sync-label">not synced</span></div>
+  </div>
+  <div class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Overview</div>
+      <button class="nav-btn active" onclick="showView('home')" id="nav-home">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-btn" onclick="showView('mocks')" id="nav-mocks">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+        Mock Tests
+      </button>
+      <button class="nav-btn" onclick="showView('notes')" id="nav-notes">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>
+        Notes
+      </button>
+      <button class="nav-btn" onclick="showView('timer')" id="nav-timer">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5"/><path d="M9 3h6"/></svg>
+        Timer
+      </button>
+      <button class="nav-btn" onclick="showView('settings')" id="nav-settings">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 4.6 15a1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 8.9 4.6a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 19.4 9"/></svg>
+        Settings
+      </button>
     </div>
-  </header>
+    <div class="nav-section">
+      <div class="nav-label">Group I</div>
+      <button class="nav-btn" onclick="showView('fr')" id="nav-fr"><span class="nav-dot" style="background:var(--fr)"></span>Financial Reporting<span class="nav-health" id="nh-fr"></span></button>
+      <button class="nav-btn" onclick="showView('afm')" id="nav-afm"><span class="nav-dot" style="background:var(--afm)"></span>AFM<span class="nav-health" id="nh-afm"></span></button>
+      <button class="nav-btn" onclick="showView('audit')" id="nav-audit"><span class="nav-dot" style="background:var(--audit)"></span>Auditing &amp; Ethics<span class="nav-health" id="nh-audit"></span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Group II</div>
+      <button class="nav-btn" onclick="showView('dt')" id="nav-dt"><span class="nav-dot" style="background:var(--dt)"></span>Direct Tax<span class="nav-health" id="nh-dt"></span></button>
+      <button class="nav-btn" onclick="showView('idt')" id="nav-idt"><span class="nav-dot" style="background:var(--idt)"></span>Indirect Tax<span class="nav-health" id="nh-idt"></span></button>
+      <button class="nav-btn" onclick="showView('ibs')" id="nav-ibs"><span class="nav-dot" style="background:var(--ibs)"></span>IBS (Paper 6)<span class="nav-health" id="nh-ibs"></span></button>
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div style="font-size:10px;color:var(--text3);margin-bottom:3px">Overall progress</div>
+    <div class="overall-pct" id="overall-pct">0%</div>
+    <div style="margin-top:7px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden">
+      <div id="overall-bar" style="height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width .4s"></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--accent);font-family:'DM Mono',monospace" id="reward-points">Reward points: 0</div>
+    <div style="margin-top:10px;font-size:10px;color:var(--text3)" id="sidebar-days"></div>
+  </div>
+</nav>
 
-  <section class="companion-panel">
-    <div class="companion-grid">
-      <div class="companion-item">
-        <div class="companion-label">Exam Window (Updated)</div>
-        <div class="companion-value">Nov 1st Week 2026</div>
-        <div class="phase-text" id="countdownText">Loading countdown…</div>
-      </div>
-      <div class="companion-item">
-        <div class="companion-label">Current Study Phase</div>
-        <div class="companion-value" id="phaseText">Planning…</div>
-      </div>
-      <div class="companion-item">
-        <div class="companion-label">Today Target</div>
-        <div class="focus-actions">
-          <button class="mini-btn" onclick="adjustDailyTarget(-1)">-</button>
-          <div class="companion-value" id="dailyTargetText">3 chapters</div>
-          <button class="mini-btn" onclick="adjustDailyTarget(1)">+</button>
+<!-- MAIN -->
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="view active" id="view-home">
+  <div class="page-heading" id="home-greeting">Good morning, Koushika.</div>
+  <div class="page-sub" id="home-sub">Let's make today count.</div>
+
+  <div class="phase-grid" id="phase-grid"></div>
+
+  <div class="two-col">
+    <div class="focus-card">
+      <h3>Today's Focus</h3>
+      <div id="focus-list"></div>
+    </div>
+    <div class="focus-card">
+      <h3>Study Streak &amp; Velocity</h3>
+      <div class="streak-row">
+        <div>
+          <div class="streak-num" id="streak-num">0</div>
+          <div class="streak-label">day streak</div>
         </div>
-        <div class="companion-label" id="todayDoneText">0 done today</div>
-      </div>
-      <div class="companion-item">
-        <div class="companion-label">Focus Recommendation</div>
-        <div class="companion-value" id="focusSuggestion">Tap for next best chapter</div>
-        <div class="focus-actions" id="focusActions">
-          <button class="mini-btn" onclick="pickNextChapter()">Pick Next</button>
+        <div class="velocity-row" id="velocity-row">
+          <div class="vel-item"><div class="vel-val" id="vel-avg">ΓÇö</div><div class="vel-label">hrs/day (7d avg)</div></div>
+          <div class="vel-item"><div class="vel-val" id="vel-ch">ΓÇö</div><div class="vel-label">chapters/week</div></div>
+          <div class="vel-item"><div class="vel-val" id="vel-proj">ΓÇö</div><div class="vel-label">projected finish</div></div>
         </div>
       </div>
-    </div>
-    <div class="badges-wrap" id="badgesWrap"></div>
-  </section>
-
-  <div class="stats-bar">
-    <div class="stat">
-      <div class="stat-value" id="totalPoints">0</div>
-      <div class="stat-label">Total Points</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="chaptersCompleted">0</div>
-      <div class="stat-label">Chapters Completed</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="completionPercent">0%</div>
-      <div class="stat-label">Overall Progress</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="streak">0</div>
-      <div class="stat-label">Day Streak</div>
+      <div class="hours-week" id="hours-week" style="margin-top:10px"></div>
+      <div class="hours-avg" id="hours-avg-label"></div>
     </div>
   </div>
 
-  <div class="subjects-grid" id="subjectsGrid"></div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">Chapters done</div><div class="stat-val" id="s-done">0</div><div class="stat-unit" id="s-done-of">of 48 total</div></div>
+    <div class="stat-card"><div class="stat-label">Lectures done</div><div class="stat-val" id="s-lec">0</div><div class="stat-unit">chapters</div></div>
+    <div class="stat-card"><div class="stat-label">Avg clarity</div><div class="stat-val" id="s-clarity">ΓÇö</div><div class="stat-unit">across rated topics</div></div>
+    <div class="stat-card"><div class="stat-label">Days to Exam</div><div class="stat-val" id="s-days">ΓÇö</div><div class="stat-unit">~Nov 1, 2026 (est.)</div></div>
+  </div>
+
+  <div class="heatmap-wrap">
+    <h3>Study Activity ΓÇö Last 90 Days</h3>
+    <div class="heatmap-grid" id="heatmap-grid"></div>
+    <div class="hm-legend">
+      <span>Less</span>
+      <div class="hm-leg-cell" style="background:var(--bg4)"></div>
+      <div class="hm-leg-cell hm-1"></div>
+      <div class="hm-leg-cell hm-2"></div>
+      <div class="hm-leg-cell hm-3"></div>
+      <div class="hm-leg-cell hm-4"></div>
+      <div class="hm-leg-cell hm-5"></div>
+      <span>More</span>
+    </div>
+  </div>
 </div>
 
-<div class="sync-status" id="syncStatus">●</div>
+<!-- SUBJECT VIEWS -->
+<div class="view" id="view-fr"></div>
+<div class="view" id="view-afm"></div>
+<div class="view" id="view-audit"></div>
+<div class="view" id="view-dt"></div>
+<div class="view" id="view-idt"></div>
+<div class="view" id="view-ibs"></div>
+
+<!-- MOCK TESTS VIEW -->
+<div class="view" id="view-mocks">
+  <div class="page-heading">Mock Test Tracker</div>
+  <div class="page-sub">Log your ICAI mock and series test scores. Pass = ΓëÑ40 per paper &amp; ΓëÑ300/600 aggregate.</div>
+  <div id="mock-rounds-list"></div>
+  <button class="mock-add-btn" onclick="addMockRound()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Test Round
+  </button>
+</div>
+
+<!-- NOTES VIEW -->
+<div class="view" id="view-notes">
+  <div class="page-heading">Quick Notes</div>
+  <div class="page-sub">Mnemonics, traps, key rules ΓÇö one card per chapter.</div>
+  <div class="notes-grid" id="notes-grid"></div>
+</div>
+
+<!-- TIMER VIEW -->
+<div class="view" id="view-timer">
+  <div class="page-heading">Study Timer</div>
+  <div class="page-sub">Persistent Pomodoro timer synced with your progress.</div>
+  <div class="panel-grid">
+    <div class="panel-card">
+      <div class="panel-title">Current session</div>
+      <div class="timer-main" id="timer-main">25:00</div>
+      <div class="timer-sub" id="timer-mode">Focus</div>
+      <div class="row">
+        <button class="action-btn accent" onclick="togglePomodoro()" id="timer-start-btn">Start</button>
+        <button class="action-btn" onclick="resetPomodoro()">Reset</button>
+        <button class="action-btn" onclick="skipPomodoro()">Skip</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span class="chip" id="timer-sessions-chip">0 sessions today</span>
+        <span class="chip" id="timer-sync-chip">synced</span>
+      </div>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">Durations</div>
+      <div class="row">
+        <label class="helper">Focus</label>
+        <input type="number" min="10" max="120" id="timer-focus-min" class="input-sm" />
+        <label class="helper">Break</label>
+        <input type="number" min="3" max="30" id="timer-break-min" class="input-sm" />
+        <button class="action-btn" onclick="saveTimerSettings()">Apply</button>
+      </div>
+      <div class="helper">Tip: Recommended 50 / 10 for CA prep blocks.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS VIEW -->
+<div class="view" id="view-settings">
+  <div class="page-heading">Settings & Notifications</div>
+  <div class="page-sub">Enable alerts, reminders, and backup your data.</div>
+  <div class="panel-grid">
+    <div class="panel-card">
+      <div class="panel-title">Browser notifications</div>
+      <div class="row">
+        <span class="chip" id="notif-status-chip">permission: default</span>
+        <button class="action-btn" onclick="requestNotificationPermission()">Enable</button>
+        <button class="action-btn" onclick="sendTestNotification()">Test</button>
+      </div>
+      <div class="helper">You will receive alerts on timer completion and reminder time.</div>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">Daily reminder</div>
+      <div class="row">
+        <input type="time" id="daily-reminder-time" class="input-sm" style="max-width:150px" />
+        <button class="action-btn" onclick="saveReminderTime()">Save</button>
+      </div>
+      <div class="helper">Default is 19:00.</div>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">Backup</div>
+      <div class="row">
+        <button class="action-btn" onclick="exportBackup()">Export JSON</button>
+        <input type="file" id="import-backup-file" class="input-sm" style="max-width:230px" accept="application/json" />
+        <button class="action-btn" onclick="importBackup()">Import</button>
+      </div>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">Reset</div>
+      <div class="row">
+        <button class="action-btn" onclick="resetTrackerData()">Reset all tracker data</button>
+      </div>
+      <div class="sync-note">Cloud and local data will be overwritten.</div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- CHAPTER MODAL -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="closeModal(event)">
+  <div class="modal" id="modal-inner">
+    <button class="modal-close" onclick="closeModalDirect()">├ù</button>
+    <div class="modal-header">
+      <div class="modal-subj-label" id="m-subj"></div>
+      <div class="modal-title" id="m-title"></div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-sec-label">Milestones</div>
+      <div class="milestone-toggles" id="m-milestones"></div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-sec-label">Clarity ΓÇö how well do you know this?</div>
+      <div class="clarity-selector" id="m-clarity"></div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-sec-label">Pomodoro Timer</div>
+      <div class="pomodoro-box">
+        <div>
+          <div class="pom-display" id="pomodoro-display">25:00</div>
+          <div class="pom-label" id="pomodoro-label">Focus</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div class="pom-btns">
+            <button class="pom-btn start" id="pom-start-btn" onclick="togglePomodoro()">Start</button>
+            <button class="pom-btn" onclick="resetPomodoro()">Reset</button>
+          </div>
+          <div class="pom-session-count" id="pom-sessions">0 sessions today</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-sec-label">Study prompt ΓÇö copy to start your Claude chat</div>
+      <div class="prompt-box" id="m-prompt" onclick="copyPrompt()"></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px">Click to copy ┬╖ Paste in a new Claude chat inside your project</div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-sec-label">Chat link ΓÇö save your conversation URL</div>
+      <div class="chat-link-row">
+        <input class="chat-link-input" id="m-chat-link" placeholder="Paste claude.ai/chat/... link here" />
+        <button class="save-btn" onclick="saveChatLink()">Save</button>
+        <a class="open-chat-btn" id="m-open-chat" href="#" target="_blank" style="display:none">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open chat
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
-// ====== CONFIG ======
-const DEFAULT_USER_ID = 'koushika_2026';
-const DEFAULT_SUPABASE_URL = 'https://qcgggntrhtfkjglxnbgi.supabase.co';
-const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjZ2dnbnRyaHRma2pnbHhuYmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTM3NTgsImV4cCI6MjA5MTA2OTc1OH0.3ovqqIAGDpg-tHig-kddy5fa0PIgtLttkfhBqI7prAk';
-const CHAPTERS = {
-  'Direct Tax Laws': [
-    'Basic Concepts',
-    'Incomes which do not form part of Total Income',
-    'Profits and Gains of Business or Profession',
-    'Capital Gains',
-    'Income from Other Sources',
-    'Income of Other Persons included in Assessee\'s Total Income',
-    'Aggregation of Income, Set Off or Carry Forward of Losses',
-    'Deductions from Gross Total Income',
-    'Assessment of Various Entities',
-    'Assessment of Trusts and Institutions, Political Parties and Other Special Entities',
-    'Tax Planning, Tax Avoidance and Tax Evasion',
-    'Taxation of Digital Transactions',
-    'Deduction, Collection and Recovery of Tax',
-    'Income Tax Authorities',
-    'Assessment Procedure',
-    'Appeals and Revision',
-    'Dispute Resolution',
-    'Miscellaneous Provisions',
-    'Provisions to Counteract Unethical Tax Practices',
-    'Tax Audit and Ethical Compliances'
-  ],
-  'International Taxation': [
-    'Non Resident Taxation',
-    'Double Taxation Relief',
-    'Advance Rulings',
-    'Transfer Pricing',
-    'Fundamentals of BEPS',
-    'Application and Interpretation of Tax Treaties',
-    'Overview of Model Tax Conventions',
-    'Latest Developments in International Taxation'
-  ],
-  'Advanced Financial Management': [
-    'Financial Policy and Corporate Strategy',
-    'Risk Management',
-    'Advanced Capital Budgeting Decisions',
-    'Security Analysis',
-    'Security Valuation',
-    'Portfolio Management',
-    'Securitization',
-    'Mutual Funds',
-    'Derivatives Analysis and Valuation',
-    'Foreign Exchange Exposure and Risk Management',
-    'International Financial Management',
-    'Interest Rate Risk Management',
-    'Business Valuation',
-    'Mergers, Acquisitions and Corporate Restructuring',
-    'Startup Finance'
-  ],
-  'Financial Reporting': [
-    'Introduction to Indian Accounting Standards',
-    'Conceptual Framework for Financial Reporting under Ind AS',
-    'Ind AS 1 – Presentation of Financial Statements',
-    'Ind AS 34 – Interim Financial Reporting',
-    'Ind AS 7 – Statement of Cash Flows',
-    'Ind AS 8 – Accounting Policies, Changes in Accounting Estimates and Errors',
-    'Ind AS 10 – Events after the Reporting Period',
-    'Ind AS 113 – Fair Value Measurement',
-    'Ind AS 2 – Inventories',
-    'Ind AS 16 – Property, Plant and Equipment',
-    'Ind AS 23 – Borrowing Costs',
-    'Ind AS 36 – Impairment of Assets',
-    'Ind AS 38 – Intangible Assets',
-    'Ind AS 40 – Investment Property',
-    'Ind AS 105 – Non-current Assets Held for Sale and Discontinued Operations',
-    'Ind AS 116 – Leases',
-    'Ind AS 19 – Employee Benefits',
-    'Ind AS 37 – Provisions, Contingent Liabilities and Contingent Assets',
-    'Ind AS 12 – Income Taxes',
-    'Ind AS 21 – Effects of Changes in Foreign Exchange Rates',
-    'Ind AS 24 – Related Party Disclosures',
-    'Ind AS 33 – Earnings per Share',
-    'Ind AS 108 – Operating Segments',
-    'Ind AS 115 – Revenue from Contracts with Customers',
-    'Ind AS 41 – Agriculture',
-    'Ind AS 20 – Accounting for Government Grants and Disclosure of Government Assistance',
-    'Ind AS 102 – Share Based Payment',
-    'Financial Instruments: Scope and Definitions',
-    'Classification and Measurement of Financial Assets and Financial Liabilities',
-    'Financial Instruments: Equity and Financial Liabilities',
-    'Derivatives and Embedded Derivatives',
-    'Recognition and Derecognition of Financial Instruments',
-    'Hedge Accounting',
-    'Financial Instruments: Disclosures',
-    'Ind AS 103 – Business Combinations',
-    'Introduction to Consolidated and Separate Financial Statements',
-    'Important Definitions (Consolidation)',
-    'Consolidated Financial Statements',
-    'Ind AS 110 – Consolidation Procedure for Subsidiaries',
-    'Ind AS 111 – Joint Arrangements',
-    'Ind AS 28 – Investments in Associates and Joint Ventures',
-    'Ind AS 27 – Separate Financial Statements',
-    'Consolidation: Disclosures',
-    'Ind AS 101 – First-time Adoption of Ind AS',
-    'Analysis of Financial Statements',
-    'Professional and Ethical Duty of a Chartered Accountant',
-    'Accounting and Technology'
-  ],
-  'Indirect Tax Laws': [
-    'Supply under GST',
-    'Charge of GST',
-    'Place of Supply',
-    'Exemptions from GST',
-    'Time of Supply',
-    'Value of Supply',
-    'Input Tax Credit',
-    'Registration',
-    'Tax Invoice, Credit and Debit Notes',
-    'Accounts and Records; E-way Bill',
-    'Payment of Tax',
-    'Electronic Commerce Transactions',
-    'Returns',
-    'Import and Export Under GST',
-    'Refunds',
-    'Job Work',
-    'Assessment and Audit',
-    'Inspection, Search, Seizure and Arrest',
-    'Demands and Recovery',
-    'Liability to Pay in Certain Cases',
-    'Offences and Penalties and Ethical Aspects under GST',
-    'Appeals and Revision',
-    'Advance Ruling',
-    'Miscellaneous Provisions',
-    'Introduction to Customs Law',
-    'Levy and Exemptions from Customs Duty',
-    'Types of Duty',
-    'Classification of Imported and Export Goods',
-    'Valuation under the Customs Act, 1962',
-    'Importation and Exportation of Goods',
-    'Warehousing',
-    'Refund (Customs)',
-    'Introduction to FTP',
-    'Basic Concepts relating to Export Promotion Schemes under FTP'
-  ],
-  'Audit': [
-    'Quality Control',
-    'General Auditing Principles and Auditor\'s Responsibilities',
-    'Audit Planning, Strategy and Execution',
-    'Materiality, Risk Assessment and Internal Control',
-    'Audit Evidence',
-    'Completion and Review',
-    'Reporting',
-    'Specialised Areas',
-    'Related Services',
-    'Review of Financial Information',
-    'Prospective Financial Information and Other Assurance Services',
-    'Digital Auditing & Assurance',
-    'Group Audits',
-    'Special Features of Audit of Banks & Non-Banking Financial Companies',
-    'Overview of Audit of Public Sector Undertakings',
-    'Internal Audit',
-    'Due Diligence, Investigation & Forensic Accounting',
-    'Sustainable Development Goals (SDG) & Environment, Social and Governance (ESG) Assurance',
-    'Professional Ethics & Liabilities of Auditors'
-  ]
+// ΓöÇΓöÇ FIREBASE CONFIG ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// 1. Go to console.firebase.google.com ΓåÆ New project ΓåÆ Firestore ΓåÆ Web app
+// 2. Paste your config object here
+// 3. Leave as-is to use local storage mode (no cloud sync)
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyAkde7amdjI_pp30wpvW8YuQO8-Zq8UBzQ",
+  authDomain:        "ca-koushika.firebaseapp.com",
+  projectId:         "ca-koushika",
+  storageBucket:     "ca-koushika.firebasestorage.app",
+  messagingSenderId: "458779758555",
+  appId:             "1:458779758555:web:d021286b31f930961b61fe",
+  measurementId:     "G-4M0HPSNSTG"
+};
+const FIREBASE_COLLECTION = "ca_hub";
+const FIREBASE_DOC        = "koushika_2026";
+const FIREBASE_ENABLE_PERSISTENCE = true;
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+// ΓöÇΓöÇ SYLLABUS DATA ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+const SUBJECTS = {
+  fr: {
+    paper:1, group:1, label:'Financial Reporting', short:'FR', color:'#5a8fc9', marks:100,
+    chapters:[
+      {name:'Introduction to Indian Accounting Standards', topics:'ICAI official chapter'},
+      {name:'Conceptual Framework for Financial Reporting under Ind AS', topics:'ICAI official chapter'},
+      {name:'Ind AS 1 – Presentation of Financial Statements', topics:'ICAI official chapter'},
+      {name:'Ind AS 34 – Interim Financial Reporting', topics:'ICAI official chapter'},
+      {name:'Ind AS 7 – Statement of Cash Flows', topics:'ICAI official chapter'},
+      {name:'Ind AS 8 – Accounting Policies, Changes in Accounting Estimates and Errors', topics:'ICAI official chapter'},
+      {name:'Ind AS 10 – Events after the Reporting Period', topics:'ICAI official chapter'},
+      {name:'Ind AS 113 – Fair Value Measurement', topics:'ICAI official chapter'},
+      {name:'Ind AS 2 – Inventories', topics:'ICAI official chapter'},
+      {name:'Ind AS 16 – Property, Plant and Equipment', topics:'ICAI official chapter'},
+      {name:'Ind AS 23 – Borrowing Costs', topics:'ICAI official chapter'},
+      {name:'Ind AS 36 – Impairment of Assets', topics:'ICAI official chapter'},
+      {name:'Ind AS 38 – Intangible Assets', topics:'ICAI official chapter'},
+      {name:'Ind AS 40 – Investment Property', topics:'ICAI official chapter'},
+      {name:'Ind AS 105 – Non-current Assets Held for Sale and Discontinued Operations', topics:'ICAI official chapter'},
+      {name:'Ind AS 116 – Leases', topics:'ICAI official chapter'},
+      {name:'Ind AS 19 – Employee Benefits', topics:'ICAI official chapter'},
+      {name:'Ind AS 37 – Provisions, Contingent Liabilities and Contingent Assets', topics:'ICAI official chapter'},
+      {name:'Ind AS 12 – Income Taxes', topics:'ICAI official chapter'},
+      {name:'Ind AS 21 – Effects of Changes in Foreign Exchange Rates', topics:'ICAI official chapter'},
+      {name:'Ind AS 24 – Related Party Disclosures', topics:'ICAI official chapter'},
+      {name:'Ind AS 33 – Earnings per Share', topics:'ICAI official chapter'},
+      {name:'Ind AS 108 – Operating Segments', topics:'ICAI official chapter'},
+      {name:'Ind AS 115 – Revenue from Contracts with Customers', topics:'ICAI official chapter'},
+      {name:'Ind AS 41 – Agriculture', topics:'ICAI official chapter'},
+      {name:'Ind AS 20 – Accounting for Government Grants and Disclosure of Government Assistance', topics:'ICAI official chapter'},
+      {name:'Ind AS 102 – Share Based Payment', topics:'ICAI official chapter'},
+      {name:'Financial Instruments: Scope and Definitions', topics:'ICAI official chapter'},
+      {name:'Classification and Measurement of Financial Assets and Financial Liabilities', topics:'ICAI official chapter'},
+      {name:'Financial Instruments: Equity and Financial Liabilities', topics:'ICAI official chapter'},
+      {name:'Derivatives and Embedded Derivatives', topics:'ICAI official chapter'},
+      {name:'Recognition and Derecognition of Financial Instruments', topics:'ICAI official chapter'},
+      {name:'Hedge Accounting', topics:'ICAI official chapter'},
+      {name:'Financial Instruments: Disclosures', topics:'ICAI official chapter'},
+      {name:'Ind AS 103 – Business Combinations', topics:'ICAI official chapter'},
+      {name:'Introduction to Consolidated and Separate Financial Statements', topics:'ICAI official chapter'},
+      {name:'Important Definitions (Consolidation)', topics:'ICAI official chapter'},
+      {name:'Consolidated Financial Statements', topics:'ICAI official chapter'},
+      {name:'Ind AS 110 – Consolidation Procedure for Subsidiaries', topics:'ICAI official chapter'},
+      {name:'Ind AS 111 – Joint Arrangements', topics:'ICAI official chapter'},
+      {name:'Ind AS 28 – Investments in Associates and Joint Ventures', topics:'ICAI official chapter'},
+      {name:'Ind AS 27 – Separate Financial Statements', topics:'ICAI official chapter'},
+      {name:'Consolidation: Disclosures', topics:'ICAI official chapter'},
+      {name:'Ind AS 101 – First-time Adoption of Ind AS', topics:'ICAI official chapter'},
+      {name:'Analysis of Financial Statements', topics:'ICAI official chapter'},
+      {name:'Professional and Ethical Duty of a Chartered Accountant', topics:'ICAI official chapter'},
+      {name:'Accounting and Technology', topics:'ICAI official chapter'}
+    ]
+  },
+  afm: {
+    paper:2, group:1, label:'Advanced Financial Management', short:'AFM', color:'#8a6ac9', marks:100,
+    chapters:[
+      {name:'Financial Policy and Corporate Strategy', topics:'ICAI official chapter'},
+      {name:'Risk Management', topics:'ICAI official chapter'},
+      {name:'Advanced Capital Budgeting Decisions', topics:'ICAI official chapter'},
+      {name:'Security Analysis', topics:'ICAI official chapter'},
+      {name:'Security Valuation', topics:'ICAI official chapter'},
+      {name:'Portfolio Management', topics:'ICAI official chapter'},
+      {name:'Securitization', topics:'ICAI official chapter'},
+      {name:'Mutual Funds', topics:'ICAI official chapter'},
+      {name:'Derivatives Analysis and Valuation', topics:'ICAI official chapter'},
+      {name:'Foreign Exchange Exposure and Risk Management', topics:'ICAI official chapter'},
+      {name:'International Financial Management', topics:'ICAI official chapter'},
+      {name:'Interest Rate Risk Management', topics:'ICAI official chapter'},
+      {name:'Business Valuation', topics:'ICAI official chapter'},
+      {name:'Mergers, Acquisitions and Corporate Restructuring', topics:'ICAI official chapter'},
+      {name:'Startup Finance', topics:'ICAI official chapter'}
+    ]
+  },
+  audit: {
+    paper:3, group:1, label:'Advanced Auditing & Professional Ethics', short:'AAA', color:'#c96a7a', marks:100,
+    chapters:[
+      {name:'Quality Control', topics:'ICAI official chapter'},
+      {name:'General Auditing Principles and Auditor\'s Responsibilities', topics:'ICAI official chapter'},
+      {name:'Audit Planning, Strategy and Execution', topics:'ICAI official chapter'},
+      {name:'Materiality, Risk Assessment and Internal Control', topics:'ICAI official chapter'},
+      {name:'Audit Evidence', topics:'ICAI official chapter'},
+      {name:'Completion and Review', topics:'ICAI official chapter'},
+      {name:'Reporting', topics:'ICAI official chapter'},
+      {name:'Specialised Areas', topics:'ICAI official chapter'},
+      {name:'Related Services', topics:'ICAI official chapter'},
+      {name:'Review of Financial Information', topics:'ICAI official chapter'},
+      {name:'Prospective Financial Information and Other Assurance Services', topics:'ICAI official chapter'},
+      {name:'Digital Auditing & Assurance', topics:'ICAI official chapter'},
+      {name:'Group Audits', topics:'ICAI official chapter'},
+      {name:'Special Features of Audit of Banks & Non-Banking Financial Companies', topics:'ICAI official chapter'},
+      {name:'Overview of Audit of Public Sector Undertakings', topics:'ICAI official chapter'},
+      {name:'Internal Audit', topics:'ICAI official chapter'},
+      {name:'Due Diligence, Investigation & Forensic Accounting', topics:'ICAI official chapter'},
+      {name:'Sustainable Development Goals (SDG) & Environment, Social and Governance (ESG) Assurance', topics:'ICAI official chapter'},
+      {name:'Professional Ethics & Liabilities of Auditors', topics:'ICAI official chapter'}
+    ]
+  },
+  dt: {
+    paper:4, group:2, label:'Direct Tax Laws & International Taxation', short:'DT', color:'#c9914a', marks:100,
+    chapters:[
+      {name:'Basic Concepts', topics:'ICAI official chapter'},
+      {name:'Incomes which do not form part of Total Income', topics:'ICAI official chapter'},
+      {name:'Profits and Gains of Business or Profession', topics:'ICAI official chapter'},
+      {name:'Capital Gains', topics:'ICAI official chapter'},
+      {name:'Income from Other Sources', topics:'ICAI official chapter'},
+      {name:'Income of Other Persons included in Assessee\'s Total Income', topics:'ICAI official chapter'},
+      {name:'Aggregation of Income, Set Off or Carry Forward of Losses', topics:'ICAI official chapter'},
+      {name:'Deductions from Gross Total Income', topics:'ICAI official chapter'},
+      {name:'Assessment of Various Entities', topics:'ICAI official chapter'},
+      {name:'Assessment of Trusts and Institutions, Political Parties and Other Special Entities', topics:'ICAI official chapter'},
+      {name:'Tax Planning, Tax Avoidance and Tax Evasion', topics:'ICAI official chapter'},
+      {name:'Taxation of Digital Transactions', topics:'ICAI official chapter'},
+      {name:'Deduction, Collection and Recovery of Tax', topics:'ICAI official chapter'},
+      {name:'Income Tax Authorities', topics:'ICAI official chapter'},
+      {name:'Assessment Procedure', topics:'ICAI official chapter'},
+      {name:'Appeals and Revision', topics:'ICAI official chapter'},
+      {name:'Dispute Resolution', topics:'ICAI official chapter'},
+      {name:'Miscellaneous Provisions', topics:'ICAI official chapter'},
+      {name:'Provisions to Counteract Unethical Tax Practices', topics:'ICAI official chapter'},
+      {name:'Tax Audit and Ethical Compliances', topics:'ICAI official chapter'},
+      {name:'Non Resident Taxation', topics:'ICAI official chapter'},
+      {name:'Double Taxation Relief', topics:'ICAI official chapter'},
+      {name:'Advance Rulings', topics:'ICAI official chapter'},
+      {name:'Transfer Pricing', topics:'ICAI official chapter'},
+      {name:'Fundamentals of BEPS', topics:'ICAI official chapter'},
+      {name:'Application and Interpretation of Tax Treaties', topics:'ICAI official chapter'},
+      {name:'Overview of Model Tax Conventions', topics:'ICAI official chapter'},
+      {name:'Latest Developments in International Taxation', topics:'ICAI official chapter'}
+    ]
+  },
+  idt: {
+    paper:5, group:2, label:'Indirect Tax Laws (GST & Customs)', short:'IDT', color:'#6aaa72', marks:100,
+    chapters:[
+      {name:'Supply under GST', topics:'ICAI official chapter'},
+      {name:'Charge of GST', topics:'ICAI official chapter'},
+      {name:'Place of Supply', topics:'ICAI official chapter'},
+      {name:'Exemptions from GST', topics:'ICAI official chapter'},
+      {name:'Time of Supply', topics:'ICAI official chapter'},
+      {name:'Value of Supply', topics:'ICAI official chapter'},
+      {name:'Input Tax Credit', topics:'ICAI official chapter'},
+      {name:'Registration', topics:'ICAI official chapter'},
+      {name:'Tax Invoice, Credit and Debit Notes', topics:'ICAI official chapter'},
+      {name:'Accounts and Records; E-way Bill', topics:'ICAI official chapter'},
+      {name:'Payment of Tax', topics:'ICAI official chapter'},
+      {name:'Electronic Commerce Transactions', topics:'ICAI official chapter'},
+      {name:'Returns', topics:'ICAI official chapter'},
+      {name:'Import and Export Under GST', topics:'ICAI official chapter'},
+      {name:'Refunds', topics:'ICAI official chapter'},
+      {name:'Job Work', topics:'ICAI official chapter'},
+      {name:'Assessment and Audit', topics:'ICAI official chapter'},
+      {name:'Inspection, Search, Seizure and Arrest', topics:'ICAI official chapter'},
+      {name:'Demands and Recovery', topics:'ICAI official chapter'},
+      {name:'Liability to Pay in Certain Cases', topics:'ICAI official chapter'},
+      {name:'Offences and Penalties and Ethical Aspects under GST', topics:'ICAI official chapter'},
+      {name:'Appeals and Revision', topics:'ICAI official chapter'},
+      {name:'Advance Ruling', topics:'ICAI official chapter'},
+      {name:'Miscellaneous Provisions', topics:'ICAI official chapter'},
+      {name:'Introduction to Customs Law', topics:'ICAI official chapter'},
+      {name:'Levy and Exemptions from Customs Duty', topics:'ICAI official chapter'},
+      {name:'Types of Duty', topics:'ICAI official chapter'},
+      {name:'Classification of Imported and Export Goods', topics:'ICAI official chapter'},
+      {name:'Valuation under the Customs Act, 1962', topics:'ICAI official chapter'},
+      {name:'Importation and Exportation of Goods', topics:'ICAI official chapter'},
+      {name:'Warehousing', topics:'ICAI official chapter'},
+      {name:'Refund (Customs)', topics:'ICAI official chapter'},
+      {name:'Introduction to FTP', topics:'ICAI official chapter'},
+      {name:'Basic Concepts relating to Export Promotion Schemes under FTP', topics:'ICAI official chapter'}
+    ]
+  },
+  ibs: {
+    paper:6, group:2, label:'Integrated Business Solutions (IBS)', short:'IBS', color:'#4ab8c9', marks:100,
+    chapters:[
+      {name:'Strategic Management & Corporate Governance',      topics:'SWOT/PESTLE ┬╖ Porter\'s 5 forces ┬╖ BSC ┬╖ Corporate governance ┬╖ Board structures ┬╖ Risk governance'},
+      {name:'Financial Reporting ΓÇö Integrated Case Application', topics:'Ind AS application in case scenarios ┬╖ Policy choices ┬╖ Presentation ┬╖ Disclosure ┬╖ Red flags'},
+      {name:'AFM ΓÇö Case-based Financial Decisions',             topics:'Project finance ┬╖ Valuation in M&A cases ┬╖ Treasury ┬╖ Risk management decisions ┬╖ Working capital'},
+      {name:'Taxation ΓÇö Combined Case Scenarios',               topics:'DT + IDT combined scenarios ┬╖ Tax planning in restructuring ┬╖ GST + customs interactions ┬╖ IBC provisions'},
+      {name:'Auditing, Risk & Ethics in Business Context',      topics:'Risk-based audit in cases ┬╖ IFC evaluation ┬╖ Whistleblowing ┬╖ Ethical dilemmas ┬╖ NOCLAR in cases'},
+      {name:'Past Paper Case Studies & Exam Strategy',         topics:'ICAI past IBS papers ┬╖ Open-book navigation ┬╖ Time management ┬╖ Presentation format ┬╖ Scoring patterns'}
+    ]
+  }
 };
 
-const TOTAL_CHAPTERS = Object.values(CHAPTERS).reduce((sum, arr) => sum + arr.length, 0);
-const EXAM_WINDOW_START = new Date('2026-11-01T00:00:00+05:30');
-const SUBJECT_POINTS = {
-  'Advanced Financial Management': 15,
-  'Financial Reporting': 15,
-  'Direct Tax Laws': 10,
-  'International Taxation': 10,
-  'Indirect Tax Laws': 10,
-  'Audit': 10
-};
-const BADGE_MILESTONES = [10, 25, 50, 75, 100];
+const MILESTONES     = ['Lecture', 'Notes', 'Practice', 'Revision 1', 'Mock/Test', 'Revision 2'];
+const MS_SHORT       = ['Lec', 'Notes', 'Prac', 'Rev1', 'Test', 'Rev2'];
+const CLARITY_LABELS = ['', 'Very shaky', 'Shaky', 'Getting there', 'Solid', 'Crystal clear'];
+const CLARITY_COLORS = ['', '#c96a5a', '#c9914a', '#c9914a', '#6aaa72', '#6aaa72'];
+const CHAPTER_REWARD_POINTS = 10;
 
-// ====== STATE ======
-let userId = localStorage.getItem('userId') || DEFAULT_USER_ID;
-let supabaseUrl = localStorage.getItem('supabaseUrl') || DEFAULT_SUPABASE_URL;
-let supabaseKey = localStorage.getItem('supabaseKey') || DEFAULT_SUPABASE_KEY;
-let supabaseReady = false;
-let localProgress = {};
-let localCompletedAt = JSON.parse(localStorage.getItem('completedAt') || '{}');
-let dailyTarget = parseInt(localStorage.getItem('dailyTarget') || '3', 10);
-let pollTimer = null;
+const PHASES = [
+  {label:'First Coverage', range:'Apr ΓÇô Aug 2026', start:'2026-04-01', end:'2026-08-31', msIdx:[0,1], color:'#5a8fc9'},
+  {label:'Revision + PYQ', range:'Sep 2026', start:'2026-09-01', end:'2026-09-30', msIdx:[2,3], color:'#8a6ac9'},
+  {label:'Mock Tests',     range:'Oct 2026', start:'2026-10-01', end:'2026-10-24', msIdx:[4],   color:'#c9914a'},
+  {label:'Final Revision', range:'Late Oct 2026', start:'2026-10-25', end:'2026-11-01', msIdx:[5],   color:'#6aaa72'}
+];
 
-function getChapterPoints(subject) {
-  return SUBJECT_POINTS[subject] || 10;
+const MOCK_ROUNDS_DEFAULT = [
+  {id:'icai1',   label:'ICAI Mock 1'},
+  {id:'icai2',   label:'ICAI Mock 2'},
+  {id:'series1', label:'Test Series 1'},
+  {id:'series2', label:'Test Series 2'}
+];
+
+// ΓöÇΓöÇ STATE ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+let state = {};
+let firebaseReady = false;
+let docRef = null;
+let unsubscribe = null;
+let noteDebounce = {};
+let pendingCloudWrites = {};
+
+function ensureDefaults() {
+  if (!state || typeof state !== 'object') state = {};
+  if (!state.timer_state || typeof state.timer_state !== 'object') {
+    state.timer_state = {
+      remaining: 25*60,
+      active: false,
+      breakMode: false,
+      focusMin: 25,
+      breakMin: 5,
+      sessionsToday: 0,
+      sessionsDate: new Date().toISOString().slice(0,10),
+      lastTick: 0
+    };
+  }
+  if (!state.daily_reminder) state.daily_reminder = '19:00';
+  if (typeof state.reward_points !== 'number') state.reward_points = 0;
+  const today = new Date().toISOString().slice(0,10);
+  if (state.timer_state.sessionsDate !== today) {
+    state.timer_state.sessionsDate = today;
+    state.timer_state.sessionsToday = 0;
+  }
 }
 
-function getTotalPoints() {
-  return Object.entries(localProgress).reduce((acc, [key, done]) => {
-    if (!done) return acc;
-    const subject = key.split('|')[0];
-    return acc + getChapterPoints(subject);
-  }, 0);
+function readLocalState() {
+  try {
+    const s = localStorage.getItem('ca_hub_v3');
+    const parsed = s ? JSON.parse(s) : {};
+    state = parsed || {};
+    ensureDefaults();
+    return state;
+  } catch (e) {
+    state = {};
+    ensureDefaults();
+    return state;
+  }
 }
 
-function getTodayCompletedCount() {
-  const today = new Date().toISOString().slice(0, 10);
-  return Object.values(localCompletedAt).filter(v => typeof v === 'string' && v.slice(0, 10) === today).length;
+function writeLocalState() {
+  try { localStorage.setItem('ca_hub_v3', JSON.stringify(state)); } catch (e) {}
 }
 
-function adjustDailyTarget(delta) {
-  dailyTarget = Math.min(12, Math.max(1, dailyTarget + delta));
-  localStorage.setItem('dailyTarget', String(dailyTarget));
-  renderCompanion();
+function queueCloudWrites(obj) {
+  pendingCloudWrites = { ...pendingCloudWrites, ...obj };
 }
 
-function renderCompanion() {
-  const now = new Date();
-  const msLeft = EXAM_WINDOW_START.getTime() - now.getTime();
-  const daysLeft = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
-  const countdownText = daysLeft === 0
-    ? 'Exam window has started — stay calm and execute.'
-    : `${daysLeft} day${daysLeft > 1 ? 's' : ''} to go`;
+function flushPendingCloudWrites() {
+  if (!firebaseReady || !docRef) return;
+  const keys = Object.keys(pendingCloudWrites);
+  if (!keys.length) return;
 
-  const phaseDate1 = new Date('2026-08-31T23:59:59+05:30');
-  const phaseDate2 = new Date('2026-09-30T23:59:59+05:30');
-  const phaseDate3 = new Date('2026-10-24T23:59:59+05:30');
-  let phase = 'Phase 4: Final Revision + Rapid Recall';
-  if (now <= phaseDate1) phase = 'Phase 1: Complete 1st Coverage (All Chapters)';
-  else if (now <= phaseDate2) phase = 'Phase 2: Revision 1 + PYQ + RTP';
-  else if (now <= phaseDate3) phase = 'Phase 3: Mocks + Weak-Area Surgery';
+  const payload = { ...pendingCloudWrites };
+  pendingCloudWrites = {};
 
-  document.getElementById('countdownText').textContent = countdownText;
-  document.getElementById('phaseText').textContent = phase;
-  document.getElementById('dailyTargetText').textContent = `${dailyTarget} chapter${dailyTarget > 1 ? 's' : ''}`;
-
-  const todayDone = getTodayCompletedCount();
-  const remaining = Math.max(0, dailyTarget - todayDone);
-  document.getElementById('todayDoneText').textContent = `${todayDone} done today • ${remaining} to target`;
-
-  renderBadges();
+  docRef.set(payload, { merge: true }).then(() => {
+    setSyncStatus(true, 'live');
+  }).catch((err) => {
+    console.error('Cloud flush failed:', err);
+    queueCloudWrites(payload);
+    setSyncStatus(false, 'sync blocked ΓÇö local save');
+  });
 }
 
-function renderBadges() {
-  const wrap = document.getElementById('badgesWrap');
-  if (!wrap) return;
-  const completed = Object.values(localProgress).filter(Boolean).length;
-  const percent = Math.round((completed / TOTAL_CHAPTERS) * 100);
-  wrap.innerHTML = BADGE_MILESTONES.map(m => {
-    const unlocked = percent >= m;
-    return `<span class="badge-chip ${unlocked ? 'unlocked' : ''}">${m}% ${unlocked ? 'Unlocked' : 'Locked'}</span>`;
-  }).join('');
-}
+function bindFirestoreSync(db) {
+  docRef = db.collection(FIREBASE_COLLECTION).doc(FIREBASE_DOC);
+  setSyncStatus(false, 'connectingΓÇª');
 
-function pickNextChapter() {
-  const preferred = ['Advanced Financial Management', 'Financial Reporting'];
-  let pick = null;
-
-  for (const subject of preferred) {
-    const chapter = CHAPTERS[subject].find(ch => !localProgress[`${subject}|${ch}`]);
-    if (chapter) {
-      pick = { subject, chapter };
-      break;
-    }
+  if (unsubscribe) {
+    try { unsubscribe(); } catch (e) {}
+    unsubscribe = null;
   }
 
-  if (!pick) {
-    const sorted = Object.entries(CHAPTERS)
-      .map(([subject, chapters]) => {
-        const done = chapters.filter(ch => localProgress[`${subject}|${ch}`]).length;
-        return { subject, chapters, ratio: done / chapters.length };
-      })
-      .sort((a, b) => a.ratio - b.ratio);
-
-    for (const item of sorted) {
-      const chapter = item.chapters.find(ch => !localProgress[`${item.subject}|${ch}`]);
-      if (chapter) {
-        pick = { subject: item.subject, chapter };
-        break;
-      }
+  unsubscribe = docRef.onSnapshot({ includeMetadataChanges: true }, snap => {
+    if (snap.exists) {
+      // Remote truth merged over local cache.
+      state = { ...state, ...snap.data() };
+      ensureDefaults();
+      writeLocalState();
+    } else {
+      docRef.set(state, { merge: true }).catch(err => {
+        console.error('Initial Firestore bootstrap failed:', err);
+        setSyncStatus(false, 'offline ΓÇö local save');
+      });
     }
-  }
 
-  const target = document.getElementById('focusSuggestion');
-  if (!pick) {
-    target.textContent = 'All chapters completed — revision + mocks mode unlocked ✅';
+    firebaseReady = true;
+    setSyncStatus(true, snap.metadata.fromCache ? 'cache sync' : 'live');
+    flushPendingCloudWrites();
+    renderAll();
+  }, err => {
+    console.error('Firestore error:', err);
+    if (err && err.code === 'permission-denied') {
+      setSyncStatus(false, 'cloud rules blocked');
+    } else {
+      setSyncStatus(false, 'offline ΓÇö local save');
+    }
+    loadLocal();
+  });
+}
+
+function initFirebase() {
+  // Hydrate local state first so refresh never starts from blank.
+  state = readLocalState();
+  const configured = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
+  if (!configured) {
+    setSyncStatus(false, 'local only');
+    renderAll();
     return;
   }
-  target.textContent = `${pick.subject} → ${pick.chapter}`;
-}
-
-function getSupabaseHeaders(includeJson = false, includeUpsert = false) {
-  const headers = {
-    'apikey': supabaseKey,
-    'Authorization': `Bearer ${supabaseKey}`
-  };
-  if (includeJson) headers['Content-Type'] = 'application/json';
-  if (includeUpsert) headers['Prefer'] = 'resolution=merge-duplicates,return=minimal';
-  return headers;
-}
-
-// ====== SUPABASE INIT ======
-async function initSupabase() {
-  if (!supabaseUrl || !supabaseKey) return;
-  
   try {
-    // Test connection
-    const res = await fetch(`${supabaseUrl}/rest/v1/progress?select=count()`, {
-      headers: getSupabaseHeaders()
-    });
-    supabaseReady = res.ok;
-    updateSyncStatus();
-    
-    if (supabaseReady) {
-      loadProgressFromSupabase();
-      subscribeToChanges();
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    const db = firebase.firestore();
+
+    if (FIREBASE_ENABLE_PERSISTENCE) {
+      db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+        console.warn('Firestore persistence unavailable:', err?.code || err);
+      });
     }
-  } catch (e) {
-    console.warn('Supabase offline, using local cache');
-    updateSyncStatus();
+
+    // No authentication flow: sync directly to shared Firestore document.
+    bindFirestoreSync(db);
+  } catch(e) {
+    console.error('Firebase init failed:', e);
+    setSyncStatus(false, 'local only');
+    loadLocal();
   }
 }
 
-async function loadProgressFromSupabase() {
-  try {
-    const res = await fetch(
-      `${supabaseUrl}/rest/v1/progress?select=subject,chapter_name,completed,completed_at&user_id=eq.${encodeURIComponent(userId)}`,
-      { headers: getSupabaseHeaders() }
-    );
-    if (!res.ok) return;
-    const data = await res.json();
+function loadLocal() {
+  state = readLocalState();
+  ensureDefaults();
+  renderAll();
+}
 
-    const freshProgress = {};
-    const freshCompletedAt = {};
-    
-    data.forEach(row => {
-      const key = `${row.subject}|${row.chapter_name}`;
-      freshProgress[key] = !!row.completed;
-      if (row.completed_at) freshCompletedAt[key] = row.completed_at;
+function setSyncStatus(live, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  const chip = document.getElementById('timer-sync-chip');
+  if (dot) dot.className = 'sync-dot' + (live ? ' live' : '');
+  if (lbl) lbl.textContent = label;
+  if (chip) chip.textContent = live ? 'live sync' : 'local mode';
+}
+
+function save(key, value) {
+  state[key] = value;
+  writeLocalState();
+
+  if (firebaseReady && docRef) {
+    docRef.update({[key]: value}).catch(() => {
+      docRef.set({[key]: value}, {merge:true}).catch(() => {
+        setSyncStatus(false, 'sync blocked ΓÇö local save');
+      });
     });
-
-    localProgress = freshProgress;
-    localCompletedAt = freshCompletedAt;
-    localStorage.setItem('progress', JSON.stringify(localProgress));
-    localStorage.setItem('completedAt', JSON.stringify(localCompletedAt));
-    
-    renderUI();
-  } catch (e) {
-    console.error('Failed to load progress:', e);
-  }
-}
-
-function subscribeToChanges() {
-  // Polling fallback for real-time (Supabase requires setup for WebSocket)
-  if (pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(loadProgressFromSupabase, 3000);
-}
-
-// ====== UI RENDERING ======
-function renderUI() {
-  const grid = document.getElementById('subjectsGrid');
-  grid.innerHTML = '';
-  
-  Object.entries(CHAPTERS).forEach(([subject, chapters]) => {
-    const completed = chapters.filter(ch => {
-      const key = `${subject}|${ch}`;
-      return localProgress[key];
-    }).length;
-    
-    const card = document.createElement('div');
-    card.className = 'subject-card';
-    
-    const progressPercent = Math.round((completed / chapters.length) * 100);
-    
-    card.innerHTML = `
-      <div class="subject-header">
-        <div class="subject-title">${subject}</div>
-        <div class="subject-progress">${completed}/${chapters.length}</div>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width: ${progressPercent}%"></div>
-      </div>
-      <div class="chapters-list">
-        ${chapters.map(ch => {
-          const key = `${subject}|${ch}`;
-          const isCompleted = localProgress[key];
-          return `
-            <div class="chapter-item ${isCompleted ? 'completed' : ''}" onclick="toggleChapter('${subject}', '${ch.replace(/'/g, "\\'")}')">
-              <div class="chapter-checkbox"></div>
-              <div class="chapter-name">${ch}</div>
-              <div class="chapter-meta">
-                <div class="chapter-points">+${getChapterPoints(subject)}</div>
-              </div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-    
-    grid.appendChild(card);
-  });
-  
-  updateStats();
-  renderCompanion();
-}
-
-function updateStats() {
-  const completed = Object.values(localProgress).filter(Boolean).length;
-  const totalPoints = getTotalPoints();
-  const completionPercent = Math.round((completed / TOTAL_CHAPTERS) * 100);
-  
-  document.getElementById('totalPoints').textContent = totalPoints;
-  document.getElementById('chaptersCompleted').textContent = completed;
-  document.getElementById('completionPercent').textContent = completionPercent + '%';
-  document.getElementById('streak').textContent = calculateStreak();
-}
-
-function calculateStreak() {
-  const lastStudy = localStorage.getItem('lastStudyDate');
-  const today = new Date().toDateString();
-  
-  if (lastStudy === today) {
-    return parseInt(localStorage.getItem('streak') || 1);
-  }
-  return 0;
-}
-
-// ====== CHAPTER TOGGLE ======
-async function toggleChapter(subject, chapter) {
-  const key = `${subject}|${chapter}`;
-  const wasCompleted = localProgress[key];
-  const newState = !wasCompleted;
-  
-  localProgress[key] = newState;
-  if (newState) localCompletedAt[key] = new Date().toISOString();
-  else delete localCompletedAt[key];
-  
-  // Update local cache
-  localStorage.setItem('progress', JSON.stringify(localProgress));
-  localStorage.setItem('completedAt', JSON.stringify(localCompletedAt));
-  
-  // Update streak
-  const today = new Date().toDateString();
-  const lastStudy = localStorage.getItem('lastStudyDate');
-  if (lastStudy !== today) {
-    const currentStreak = parseInt(localStorage.getItem('streak') || 0) + 1;
-    localStorage.setItem('streak', currentStreak);
-    localStorage.setItem('lastStudyDate', today);
-  }
-  
-  // Show reward notification if completing chapter
-  if (newState && !wasCompleted) {
-    const completedCount = Object.values(localProgress).filter(Boolean).length;
-    showReward(subject, chapter, getChapterPoints(subject), completedCount);
-  }
-  
-  renderUI();
-  
-  // Sync to Supabase
-  if (supabaseReady) {
-    updateSupabase(subject, chapter, newState);
-  }
-}
-
-async function updateSupabase(subject, chapter, completed) {
-  updateSyncStatus(true);
-  
-  try {
-    const endpoint = completed
-      ? `${supabaseUrl}/rest/v1/progress?on_conflict=user_id,subject,chapter_name`
-      : `${supabaseUrl}/rest/v1/progress?user_id=eq.${encodeURIComponent(userId)}&subject=eq.${encodeURIComponent(subject)}&chapter_name=eq.${encodeURIComponent(chapter)}`;
-
-    const res = await fetch(endpoint, {
-      method: completed ? 'POST' : 'DELETE',
-      headers: completed
-        ? getSupabaseHeaders(true, true)
-        : getSupabaseHeaders(),
-      body: completed
-        ? JSON.stringify({
-            user_id: userId,
-            subject,
-            chapter_name: chapter,
-            completed: true,
-            completed_at: localCompletedAt[`${subject}|${chapter}`] || new Date().toISOString()
-          })
-        : null
-    });
-    
-    if (res.ok) {
-      updateSyncStatus();
-      return;
-    }
-    supabaseReady = false;
-    updateSyncStatus();
-  } catch (e) {
-    console.warn('Failed to sync to Supabase:', e);
-    supabaseReady = false;
-    updateSyncStatus();
-  }
-}
-
-function showReward(subject, chapter, points, completedCount) {
-  const completionPercent = Math.round((completedCount / TOTAL_CHAPTERS) * 100);
-  const notification = document.createElement('div');
-  notification.className = 'reward-notification';
-  notification.innerHTML = `
-    <h3>🎉 Chapter Complete!</h3>
-    <p>+${points} Points • ${subject}</p>
-    <p class="reward-meta">${chapter}</p>
-    <p class="reward-meta">Progress: ${completionPercent}% (${completedCount}/${TOTAL_CHAPTERS})</p>
-  `;
-  
-  document.body.appendChild(notification);
-  
-  // Confetti
-  for (let i = 0; i < 20; i++) {
-    const confetti = document.createElement('div');
-    confetti.className = 'confetti';
-    confetti.style.left = Math.random() * 100 + '%';
-    confetti.style.background = ['#c8b97a', '#8fb88a', '#5a8fc9'][Math.floor(Math.random() * 3)];
-    confetti.style.animationDelay = (Math.random() * 0.3) + 's';
-    document.body.appendChild(confetti);
-    setTimeout(() => confetti.remove(), 3200);
-  }
-  
-  setTimeout(() => notification.remove(), 3000);
-}
-
-function updateSyncStatus(syncing = false) {
-  const status = document.getElementById('syncStatus');
-  if (syncing) {
-    status.textContent = '⟳ Syncing...';
-    status.className = 'sync-status syncing';
-  } else if (supabaseReady) {
-    status.textContent = '✓ Synced';
-    status.className = 'sync-status synced';
   } else {
-    status.textContent = '⊕ Local Only';
-    status.className = 'sync-status';
+    queueCloudWrites({ [key]: value });
   }
 }
 
-// ====== INIT ======
-document.addEventListener('DOMContentLoaded', () => {
-  localProgress = JSON.parse(localStorage.getItem('progress') || '{}');
-  localCompletedAt = JSON.parse(localStorage.getItem('completedAt') || '{}');
-  dailyTarget = parseInt(localStorage.getItem('dailyTarget') || '3', 10);
+function saveBatch(obj) {
+  Object.assign(state, obj);
+  ensureDefaults();
+  writeLocalState();
 
-  localStorage.setItem('userId', userId);
-  localStorage.setItem('supabaseUrl', supabaseUrl);
-  localStorage.setItem('supabaseKey', supabaseKey);
+  if (firebaseReady && docRef) {
+    docRef.update(obj).catch(() => docRef.set(obj, {merge:true}).catch(() => {
+      setSyncStatus(false, 'sync blocked ΓÇö local save');
+    }));
+  } else {
+    queueCloudWrites(obj);
+  }
+}
 
-  initSupabase();
-  
-  renderUI();
-});
+// ΓöÇΓöÇ ACCESSORS ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+const k = (sid,ci,f) => `${sid}|${ci}|${f}`;
+function getMs(sid,ci,mi)    { return !!state[k(sid,ci,'ms'+mi)]; }
+function setMs(sid,ci,mi,v)  {
+  const wasDone = chapterDone(sid,ci);
+  const now = new Date().toISOString();
+  const batch = {[k(sid,ci,'ms'+mi)]: v};
+  if (v) batch[k(sid,ci,'mst'+mi)] = now; // timestamp when marked
+  saveBatch(batch);
+
+  const nowDone = chapterDone(sid,ci);
+  const rk = `reward|${sid}|${ci}`;
+  if (!wasDone && nowDone && !state[rk]) {
+    saveBatch({
+      [rk]: true,
+      reward_points: (state.reward_points || 0) + CHAPTER_REWARD_POINTS
+    });
+    showToast(`🎉 Chapter completed! +${CHAPTER_REWARD_POINTS} reward points`);
+  }
+  updateStats();
+}
+function getClarity(sid,ci)  { return state[k(sid,ci,'cl')] || 0; }
+function setClarity(sid,ci,v){ save(k(sid,ci,'cl'), v); updateStats(); }
+function getChatLink(sid,ci) { return state[k(sid,ci,'chat')] || ''; }
+function setChatLink(sid,ci,v){ save(k(sid,ci,'chat'), v); }
+function getNote(sid,ci)     { return state[k(sid,ci,'note')] || ''; }
+function setNote(sid,ci,v)   { save(k(sid,ci,'note'), v); }
+function getHours(dk)        { return parseFloat(state['hours|'+dk]) || 0; }
+function setHours(dk,h)      { save('hours|'+dk, Math.round(parseFloat(h)*10)/10 || 0); updateStats(); }
+function getStudied(dk)      { return !!state['studied|'+dk]; }
+function setStudied(dk,v)    { save('studied|'+dk, v); }
+function getMockScore(rid,sid){ return state[`mock|${rid}|${sid}|score`]; }
+function setMockScore(rid,sid,v){ save(`mock|${rid}|${sid}|score`, v === '' ? null : parseFloat(v)||0); }
+function getMockRounds()     { return state['mock_rounds'] ? JSON.parse(JSON.stringify(state['mock_rounds'])) : MOCK_ROUNDS_DEFAULT.map(r=>({...r})); }
+
+// ΓöÇΓöÇ CALCULATIONS ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function chapterDone(sid,ci) { return MILESTONES.every((_,mi) => getMs(sid,ci,mi)); }
+function subjectPct(sid) {
+  const ch = SUBJECTS[sid].chapters;
+  let total = ch.length * MILESTONES.length, done = 0;
+  ch.forEach((_,ci) => MILESTONES.forEach((_,mi) => { if(getMs(sid,ci,mi)) done++; }));
+  return total ? Math.round(done/total*100) : 0;
+}
+function subjectHealth(sid) {
+  const pct = subjectPct(sid);
+  let claritySum=0, clarityCount=0;
+  SUBJECTS[sid].chapters.forEach((_,ci) => { const cl=getClarity(sid,ci); if(cl>0){claritySum+=cl;clarityCount++;} });
+  const avg = clarityCount > 0 ? claritySum/clarityCount : 0;
+  if (pct>=60 && avg>=3.5) return 'green';
+  if (pct>=30 || avg>=2)   return 'amber';
+  return 'red';
+}
+function phasePct(pi) {
+  const ph = PHASES[pi]; let total=0, done=0;
+  Object.keys(SUBJECTS).forEach(sid => SUBJECTS[sid].chapters.forEach((_,ci) => ph.msIdx.forEach(mi => { total++; if(getMs(sid,ci,mi)) done++; })));
+  return total ? Math.round(done/total*100) : 0;
+}
+function currentPhaseIdx() {
+  const today = new Date().toISOString().slice(0,10);
+  for (let i=0; i<PHASES.length; i++) { if (today <= PHASES[i].end) return i; }
+  return PHASES.length-1;
+}
+function getVelocity() {
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-14);
+  let ms14=0;
+  Object.keys(state).forEach(k => {
+    if (k.startsWith('mst') && !k.includes('|')) return;
+    if (/\|mst\d$/.test(k)) {
+      const ts = new Date(state[k]);
+      if (!isNaN(ts) && ts > cutoff) ms14++;
+    }
+  });
+  const msPerDay = ms14/14;
+  const chapPerWeek = (msPerDay*7)/MILESTONES.length;
+  return {msPerDay, chapPerWeek};
+}
+function getProjectedDate() {
+  const {msPerDay} = getVelocity();
+  if (msPerDay < 0.05) return null;
+  let remaining=0;
+  Object.keys(SUBJECTS).forEach(sid => SUBJECTS[sid].chapters.forEach((_,ci) => MILESTONES.forEach((_,mi) => { if(!getMs(sid,ci,mi)) remaining++; })));
+  const days = Math.ceil(remaining/msPerDay);
+  const d = new Date(); d.setDate(d.getDate()+days);
+  return d;
+}
+function getStreak() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  let streak=0;
+  for (let i=0; i<=90; i++) {
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const dk=d.toISOString().slice(0,10);
+    if (getStudied(dk) || getHours(dk)>0) streak++;
+    else break;
+  }
+  return streak;
+}
+function getTodaysFocus() {
+  const pi = currentPhaseIdx();
+  const msNeeded = PHASES[pi].msIdx;
+  const candidates = [];
+  Object.keys(SUBJECTS).forEach(sid => {
+    const subj = SUBJECTS[sid];
+    subj.chapters.forEach((ch,ci) => {
+      const pending = msNeeded.filter(mi => !getMs(sid,ci,mi));
+      if (!pending.length) return;
+      const cl = getClarity(sid,ci);
+      const priority = pending.length*10 + (cl===0 ? 5 : 6-cl);
+      candidates.push({sid,ci,ch,subj,pending,cl,priority});
+    });
+  });
+  return candidates.sort((a,b)=>b.priority-a.priority).slice(0,3);
+}
+function getWeekHours() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = [];
+  for (let i=6; i>=0; i--) {
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const dk=d.toISOString().slice(0,10);
+    days.push({dk, h:getHours(dk), isToday:i===0, label:['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()]});
+  }
+  return days;
+}
+
+// ΓöÇΓöÇ POMODORO / TIMER ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+let pomInterval = null;
+let reminderInterval = null;
+
+function timerState() {
+  ensureDefaults();
+  return state.timer_state;
+}
+
+function persistTimerState() {
+  save('timer_state', timerState());
+}
+
+function maybeNotify(title, body) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') {
+    try { new Notification(title, { body }); } catch (e) {}
+  }
+}
+
+function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    showToast('Notifications not supported in this browser');
+    return;
+  }
+  Notification.requestPermission().then(() => {
+    updateNotificationStatus();
+    showToast('Notification permission updated');
+  });
+}
+
+function updateNotificationStatus() {
+  const el = document.getElementById('notif-status-chip');
+  if (!el) return;
+  const status = ('Notification' in window) ? Notification.permission : 'unsupported';
+  el.textContent = `permission: ${status}`;
+}
+
+function sendTestNotification() {
+  maybeNotify('CA Tracker', 'Notification setup is working.');
+  showToast('Test notification sent');
+}
+
+function saveReminderTime() {
+  const val = document.getElementById('daily-reminder-time')?.value || '19:00';
+  save('daily_reminder', val);
+  showToast('Reminder time saved');
+}
+
+function setupReminderLoop() {
+  if (reminderInterval) return;
+  reminderInterval = setInterval(() => {
+    const now = new Date();
+    const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const today = now.toISOString().slice(0,10);
+    const marker = `reminded|${today}`;
+    if (hhmm === (state.daily_reminder || '19:00') && !state[marker]) {
+      save(marker, true);
+      maybeNotify('CA Final Reminder', 'Time for your study block.');
+    }
+  }, 30000);
+}
+
+function togglePomodoro() {
+  const t = timerState();
+  t.active = !t.active;
+  t.lastTick = Date.now();
+  persistTimerState();
+  if (t.active && !pomInterval) pomInterval = setInterval(tickPom, 1000);
+  renderTimer();
+}
+function tickPom() {
+  const t = timerState();
+  if (!t.active) return;
+
+  const now = Date.now();
+  const elapsed = Math.floor((now - (t.lastTick || now)) / 1000);
+  if (elapsed <= 0) return;
+  t.lastTick = now;
+  t.remaining = Math.max(0, t.remaining - elapsed);
+
+  if (t.remaining<=0) {
+    t.active = false;
+    if (!t.breakMode) {
+      const today=new Date().toISOString().slice(0,10);
+      if (t.sessionsDate !== today) { t.sessionsDate = today; t.sessionsToday = 0; }
+      t.sessionsToday++;
+      setHours(today, Math.round((getHours(today)+(t.focusMin||25)/60)*10)/10);
+      setStudied(today,true);
+      t.breakMode=true;
+      t.remaining=(t.breakMin||5)*60;
+      showToast('Focus done. Break started.');
+      maybeNotify('Focus session complete', 'Take a short break.');
+      t.active = true;
+      t.lastTick = Date.now();
+    } else {
+      t.breakMode=false;
+      t.remaining=(t.focusMin||25)*60;
+      showToast('Break over. Back to focus.');
+      maybeNotify('Break complete', 'Back to your next focus block.');
+    }
+    persistTimerState();
+  }
+  renderTimer();
+}
+function resetPomodoro() {
+  const t = timerState();
+  t.active = false;
+  t.breakMode = false;
+  t.remaining = (t.focusMin||25)*60;
+  t.lastTick = 0;
+  persistTimerState();
+  renderTimer();
+}
+
+function skipPomodoro() {
+  const t = timerState();
+  t.active = false;
+  t.breakMode = !t.breakMode;
+  t.remaining = (t.breakMode ? (t.breakMin||5) : (t.focusMin||25)) * 60;
+  t.lastTick = 0;
+  persistTimerState();
+  renderTimer();
+}
+
+function saveTimerSettings() {
+  const t = timerState();
+  const focus = parseInt(document.getElementById('timer-focus-min')?.value || t.focusMin || 25, 10);
+  const brk = parseInt(document.getElementById('timer-break-min')?.value || t.breakMin || 5, 10);
+  t.focusMin = Math.max(10, Math.min(120, isNaN(focus)?25:focus));
+  t.breakMin = Math.max(3, Math.min(30, isNaN(brk)?5:brk));
+  t.active = false;
+  t.lastTick = 0;
+  t.remaining = (t.breakMode ? t.breakMin : t.focusMin) * 60;
+  persistTimerState();
+  renderTimer();
+  showToast('Timer settings updated');
+}
+
+function renderTimer() {
+  const t = timerState();
+  const m=String(Math.floor((t.remaining||0)/60)).padStart(2,'0');
+  const s=String((t.remaining||0)%60).padStart(2,'0');
+
+  const modalEl=document.getElementById('pomodoro-display');
+  const modalLb=document.getElementById('pomodoro-label');
+  const modalSb=document.getElementById('pom-start-btn');
+  const modalSc=document.getElementById('pom-sessions');
+  if (modalEl) modalEl.textContent=`${m}:${s}`;
+  if (modalLb) modalLb.textContent=t.breakMode?'Break':'Focus';
+  if (modalSb) modalSb.textContent=t.active?'Pause':'Start';
+  if (modalSc) modalSc.textContent=`${t.sessionsToday||0} sessions today`;
+
+  const viewMain=document.getElementById('timer-main');
+  const viewMode=document.getElementById('timer-mode');
+  const viewStart=document.getElementById('timer-start-btn');
+  const viewSessions=document.getElementById('timer-sessions-chip');
+  const viewFocus=document.getElementById('timer-focus-min');
+  const viewBreak=document.getElementById('timer-break-min');
+
+  if (viewMain) viewMain.textContent=`${m}:${s}`;
+  if (viewMode) viewMode.textContent=t.breakMode?'Break':'Focus';
+  if (viewStart) viewStart.textContent=t.active?'Pause':'Start';
+  if (viewSessions) viewSessions.textContent=`${t.sessionsToday||0} sessions today`;
+  if (viewFocus && document.activeElement !== viewFocus) viewFocus.value = t.focusMin || 25;
+  if (viewBreak && document.activeElement !== viewBreak) viewBreak.value = t.breakMin || 5;
+}
+
+function exportBackup() {
+  try {
+    const data = JSON.stringify(state, null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ca-tracker-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Backup exported');
+  } catch (e) {
+    showToast('Export failed');
+  }
+}
+
+function importBackup() {
+  const file = document.getElementById('import-backup-file')?.files?.[0];
+  if (!file) { showToast('Choose a JSON file first'); return; }
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const parsed = JSON.parse(String(fr.result || '{}'));
+      state = parsed || {};
+      ensureDefaults();
+      writeLocalState();
+      if (firebaseReady && docRef) docRef.set(state, {merge:true});
+      renderAll();
+      showToast('Backup imported');
+    } catch (e) {
+      showToast('Invalid backup file');
+    }
+  };
+  fr.readAsText(file);
+}
+
+function resetTrackerData() {
+  if (!window.confirm('Reset all tracker data? This cannot be undone.')) return;
+  state = {};
+  ensureDefaults();
+  writeLocalState();
+  if (firebaseReady && docRef) docRef.set(state, {merge:false});
+  renderAll();
+  showToast('Tracker reset complete');
+}
+
+// ΓöÇΓöÇ RENDER ΓÇö STATS ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function updateStats() {
+  let totalMs=0, doneMs=0, lecDone=0, claritySum=0, clarityCount=0, chDone=0;
+  Object.keys(SUBJECTS).forEach(sid => {
+    const subj=SUBJECTS[sid]; let subjDone=0;
+    subj.chapters.forEach((_,ci) => {
+      let allDone=true;
+      MILESTONES.forEach((_,mi) => { totalMs++; if(getMs(sid,ci,mi)){doneMs++;}else{allDone=false;} });
+      if (getMs(sid,ci,0)) lecDone++;
+      if (allDone) { chDone++; subjDone++; }
+      const cl=getClarity(sid,ci); if(cl>0){claritySum+=cl;clarityCount++;}
+    });
+    // nav health dots
+    const h=subjectHealth(sid);
+    const nh=document.getElementById('nh-'+sid);
+    if(nh) nh.style.background=h==='green'?'var(--green)':h==='amber'?'var(--amber)':'var(--red)';
+  });
+
+  const pct=totalMs?Math.round(doneMs/totalMs*100):0;
+  const totalCh=Object.values(SUBJECTS).reduce((s,sub)=>s+sub.chapters.length,0);
+  setText('overall-pct', pct+'%');
+  setStyle('overall-bar','width',pct+'%');
+  setText('s-done', chDone);
+  setText('s-done-of', `of ${totalCh} total`);
+  setText('s-lec', lecDone);
+  setText('s-clarity', clarityCount>0?(claritySum/clarityCount).toFixed(1)+'/5':'ΓÇö');
+
+  // days to exam
+  const g1Date=new Date('2026-11-01'); const today2=new Date(); today2.setHours(0,0,0,0);
+  const diff=Math.ceil((g1Date-today2)/(1000*60*60*24));
+  setText('s-days', diff>0?diff:'Exam!');
+  setText('sidebar-days', diff>0?`${diff} days to Exam (Nov 1 week)`:'');
+  setText('reward-points', `Reward points: ${state.reward_points || 0}`);
+
+  // greeting
+  const hr=new Date().getHours();
+  const greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+  setText('home-greeting', `${greet}, Koushika.`);
+
+  // streak
+  const streak=getStreak();
+  setText('streak-num', streak);
+
+  // velocity
+  const {msPerDay, chapPerWeek}=getVelocity();
+  setText('vel-ch', chapPerWeek>0.01?chapPerWeek.toFixed(1):'ΓÇö');
+  // 7-day avg hours
+  const wh=getWeekHours();
+  const avgH=(wh.reduce((s,d)=>s+d.h,0)/7).toFixed(1);
+  setText('vel-avg', avgH);
+  const proj=getProjectedDate();
+  setText('vel-proj', proj?proj.toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'ΓÇö');
+
+  buildHoursWeek();
+  buildHeatmap();
+  buildPhaseGrid();
+  buildFocusList();
+}
+
+function setText(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
+function setStyle(id,prop,v){ const el=document.getElementById(id); if(el) el.style[prop]=v; }
+
+// ΓöÇΓöÇ RENDER ΓÇö PHASE GRID ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function buildPhaseGrid() {
+  const el=document.getElementById('phase-grid'); if(!el) return;
+  const cur=currentPhaseIdx();
+  const today=new Date().toISOString().slice(0,10);
+  let html='';
+  PHASES.forEach((ph,i) => {
+    const pct=phasePct(i);
+    const isCur=i===cur;
+    const isPast=today>ph.end;
+    html+=`<div class="phase-card${isCur?' current':''}">
+      <div class="phase-card-top">
+        <span class="phase-badge" style="background:${ph.color}22;color:${ph.color}">Phase ${i+1}</span>
+        ${isCur?'<span class="phase-current-tag">ΓåÉ now</span>':''}
+        ${isPast&&pct>=100?'<span style="font-size:9px;color:var(--green);margin-left:auto;font-family:DM Mono,monospace">done Γ£ô</span>':''}
+      </div>
+      <div class="phase-label">${ph.label}</div>
+      <div class="phase-range">${ph.range}</div>
+      <div class="phase-bar-track"><div class="phase-bar-fill" style="width:${pct}%;background:${ph.color}"></div></div>
+      <div class="phase-pct">${pct}%</div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+// ΓöÇΓöÇ RENDER ΓÇö FOCUS LIST ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function buildFocusList() {
+  const el=document.getElementById('focus-list'); if(!el) return;
+  const items=getTodaysFocus();
+  if (!items.length) { el.innerHTML='<div class="focus-empty">All caught up for this phase!</div>'; return; }
+  el.innerHTML=items.map(({sid,ci,ch,subj,pending,cl})=>`
+    <div class="focus-item" onclick="openModal('${sid}',${ci})" style="cursor:pointer">
+      <span class="focus-subj-tag" style="background:${subj.color}22;color:${subj.color}">${subj.short}</span>
+      <div>
+        <div class="focus-ch">${ch.name}</div>
+        <div class="focus-ms">Next: ${pending.map(mi=>MILESTONES[mi]).join(', ')} ${cl>0?'┬╖ clarity '+cl+'/5':''}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ΓöÇΓöÇ RENDER ΓÇö HOURS WEEK ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function buildHoursWeek() {
+  const el=document.getElementById('hours-week'); if(!el) return;
+  const days=getWeekHours();
+  const maxH=Math.max(...days.map(d=>d.h), 1);
+  el.innerHTML=days.map(d=>`
+    <div class="hours-day">
+      <div class="hours-bar-wrap">
+        <div class="hours-bar${d.isToday?' today-bar':''}" style="height:${Math.max(d.h/maxH*100,0)}%"></div>
+      </div>
+      <div class="hours-num" title="Click to log hours" onclick="promptHours('${d.dk}',${d.isToday})">${d.h>0?d.h+'h':'┬╖'}</div>
+      <div class="hours-dn">${d.label}</div>
+    </div>`).join('');
+  const days7=getWeekHours();
+  const avg=(days7.reduce((s,d)=>s+d.h,0)/7).toFixed(1);
+  setText('hours-avg-label', `7-day avg: ${avg} hrs/day`);
+}
+
+function promptHours(dk, isToday) {
+  const cur=getHours(dk);
+  const input=window.prompt(`Hours studied ${isToday?'today':dk}:`, cur||'');
+  if (input===null) return;
+  const h=parseFloat(input);
+  if (!isNaN(h) && h>=0) {
+    setHours(dk, h);
+    if (h>0) setStudied(dk, true);
+    buildHoursWeek(); updateStats();
+  }
+}
+
+// ΓöÇΓöÇ RENDER ΓÇö HEATMAP ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function buildHeatmap() {
+  const el=document.getElementById('heatmap-grid'); if(!el) return;
+  const today=new Date(); today.setHours(0,0,0,0);
+  let html='';
+  for (let i=89; i>=0; i--) {
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const dk=d.toISOString().slice(0,10);
+    const h=getHours(dk);
+    let lvl=0;
+    if (h>=6) lvl=5; else if(h>=4) lvl=4; else if(h>=2.5) lvl=3; else if(h>=1) lvl=2; else if(h>0||getStudied(dk)) lvl=1;
+    html+=`<div class="hm-cell${lvl?' hm-'+lvl:''}" title="${dk}: ${h||0}h"></div>`;
+  }
+  el.innerHTML=html;
+}
+
+// ΓöÇΓöÇ RENDER ΓÇö SUBJECT VIEW ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function buildSubjectView(sid) {
+  const subj=SUBJECTS[sid];
+  const el=document.getElementById('view-'+sid); if(!el) return;
+  const pct=subjectPct(sid);
+  const h=subjectHealth(sid);
+  const hColor=h==='green'?'var(--green)':h==='amber'?'var(--amber)':'var(--red)';
+  const hLabel=h==='green'?'On track':h==='amber'?'Needs attention':'Needs focus';
+  let html=`
+    <div class="page-heading">Paper ${subj.paper} ΓÇö ${subj.short}</div>
+    <div class="page-sub">Group ${subj.group} ┬╖ ${subj.label} ┬╖ ${subj.marks} marks</div>
+    <div class="subj-header-row" style="margin-bottom:10px">
+      <div class="subj-bar-track" style="flex:1"><div class="subj-bar-fill" style="width:${pct}%;background:${subj.color}"></div></div>
+      <span class="subj-pct">${pct}%</span>
+    </div>
+    <div><span class="health-chip health-${h[0]}" style="background:${hColor}18;color:${hColor}">ΓùÅ ${hLabel}</span></div>
+    <div class="chapters-grid" style="margin-top:12px">`;
+  subj.chapters.forEach((ch,ci) => {
+    const cl=getClarity(sid,ci);
+    const chatLink=getChatLink(sid,ci);
+    const lecDone=getMs(sid,ci,0);
+    html+=`<div class="ch-card" onclick="openModal('${sid}',${ci})">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${subj.color};border-radius:3px 0 0 3px;opacity:${lecDone?1:0.22}"></div>
+      <div class="ch-card-name">${ch.name}</div>
+      <div class="ch-card-meta">${ch.topics.split(' ┬╖ ').slice(0,3).join(' ┬╖ ')}</div>
+      <div class="milestones-row">`;
+    MILESTONES.forEach((_,mi) => {
+      const done=getMs(sid,ci,mi);
+      html+=`<div class="ms-pip" style="${done?'background:'+subj.color+';opacity:.8':''}"></div>`;
+    });
+    html+=`</div><div class="clarity-row">`;
+    for (let d=1;d<=5;d++) {
+      const filled=cl>=d;
+      html+=`<div class="cl-dot" style="${filled?'background:'+CLARITY_COLORS[cl]+';border-color:'+CLARITY_COLORS[cl]:''}"></div>`;
+    }
+    if (cl>0) html+=`<span class="clarity-text">${cl}/5</span>`;
+    html+=`</div><div class="ch-actions">`;
+    if (chatLink) html+=`<a class="ch-btn has-chat" href="${chatLink}" target="_blank" onclick="event.stopPropagation()">Open chat Γåù</a>`;
+    else html+=`<button class="ch-btn primary" onclick="event.stopPropagation();openModal('${sid}',${ci})">Start session</button>`;
+    html+=`<button class="ch-btn" onclick="event.stopPropagation();openModal('${sid}',${ci})">Details</button>`;
+    html+=`</div></div>`;
+  });
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+// ΓöÇΓöÇ RENDER ΓÇö MOCK TRACKER ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function buildMocksView() {
+  const el=document.getElementById('mock-rounds-list'); if(!el) return;
+  const rounds=getMockRounds();
+  const sids=Object.keys(SUBJECTS);
+  let html='';
+  rounds.forEach((round,ri) => {
+    let totalScore=0, totalMax=0, allEntered=true, anyFail=false;
+    const rows=sids.map(sid => {
+      const subj=SUBJECTS[sid];
+      const score=getMockScore(round.id,sid);
+      const hasScore=score!=null&&score!=='';
+      if (!hasScore) { allEntered=false; }
+      const pct=hasScore?Math.round(score/subj.marks*100):null;
+      const pass=hasScore&&score>=40;
+      if (hasScore) { totalScore+=parseFloat(score); totalMax+=subj.marks; }
+      if (hasScore&&!pass) anyFail=true;
+      return {sid,subj,score,pct,pass,hasScore};
+    });
+    const aggPct=totalMax?Math.round(totalScore/totalMax*100):null;
+    const overallPass=allEntered&&aggPct>=50&&!anyFail;
+    html+=`<div class="mock-round-card">
+      <div class="mock-round-header">
+        <div class="mock-round-name">${round.label}</div>
+        ${totalMax>0?`<div class="mock-agg ${overallPass?'mock-pass':'mock-fail'}">${totalScore}/${totalMax} (${aggPct}%) ΓÇö ${overallPass?'PASS':'FAIL/INCOMPLETE'}</div>`:''}
+        <button class="ch-btn" style="margin-left:${totalMax>0?'8px':'auto'}" onclick="removeMockRound('${round.id}')">Remove</button>
+      </div>
+      <table class="mock-table">
+        <thead><tr><th>Paper</th><th>Subject</th><th>Score /100</th><th>%</th><th>Status</th></tr></thead>
+        <tbody>`;
+    rows.forEach(({sid,subj,score,pct,pass,hasScore})=>{
+      html+=`<tr>
+        <td style="color:var(--text3);font-family:DM Mono,monospace">${subj.paper}</td>
+        <td><span style="color:${subj.color}">${subj.short}</span></td>
+        <td><input class="score-input" type="number" min="0" max="100" placeholder="ΓÇö" value="${hasScore?score:''}" onchange="setMockScore('${round.id}','${sid}',this.value);buildMocksView()" /></td>
+        <td style="font-family:DM Mono,monospace">${pct!=null?pct+'%':'ΓÇö'}</td>
+        <td><span class="pass-pill ${hasScore?(pass?'pass':'fail'):'na'}">${hasScore?(pass?'PASS':'FAIL'):'ΓÇö'}</span></td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  });
+  el.innerHTML=html;
+}
+
+function addMockRound() {
+  const label=window.prompt('Name this test round (e.g., "ICAI Mock 1"):');
+  if (!label||!label.trim()) return;
+  const rounds=getMockRounds();
+  const id='custom_'+Date.now();
+  rounds.push({id, label:label.trim()});
+  save('mock_rounds', rounds);
+  buildMocksView();
+}
+function removeMockRound(rid) {
+  if (!confirm('Remove this round?')) return;
+  const rounds=getMockRounds().filter(r=>r.id!==rid);
+  save('mock_rounds', rounds);
+  buildMocksView();
+}
+
+// ΓöÇΓöÇ RENDER ΓÇö NOTES ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function buildNotesView() {
+  const el=document.getElementById('notes-grid'); if(!el) return;
+  let html='';
+  Object.keys(SUBJECTS).forEach(sid => {
+    const subj=SUBJECTS[sid];
+    subj.chapters.forEach((ch,ci) => {
+      html+=`<div class="note-card">
+        <div style="font-size:9px;color:${subj.color};letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px">${subj.short} ┬╖ P${subj.paper}</div>
+        <div class="note-ch">${ch.name}</div>
+        <textarea class="note-textarea" placeholder="Key rules, traps, mnemonicsΓÇª"
+          oninput="debouncedNote('${sid}',${ci},this.value)">${getNote(sid,ci)}</textarea>
+      </div>`;
+    });
+  });
+  el.innerHTML=html;
+}
+function debouncedNote(sid,ci,v) {
+  const key=sid+'|'+ci;
+  clearTimeout(noteDebounce[key]);
+  noteDebounce[key]=setTimeout(()=>setNote(sid,ci,v), 800);
+}
+
+// ΓöÇΓöÇ MODAL ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+let modalCtx=null;
+const checkSvg=()=>`<svg width="10" height="10" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 16 16"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>`;
+
+function openModal(sid,ci) {
+  modalCtx={sid,ci};
+  const subj=SUBJECTS[sid]; const ch=subj.chapters[ci];
+  document.getElementById('m-subj').textContent=`${subj.label} ┬╖ Group ${subj.group} ┬╖ Paper ${subj.paper}`;
+  document.getElementById('m-subj').style.color=subj.color;
+  document.getElementById('m-title').textContent=ch.name;
+
+  let msHtml='';
+  MILESTONES.forEach((m,mi)=>{
+    const done=getMs(sid,ci,mi);
+    const ts=state[`${sid}|${ci}|mst${mi}`];
+    const tsLabel=ts?new Date(ts).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'';
+    msHtml+=`<div class="ms-toggle${done?' done':''}" onclick="toggleMsModal(${mi})" id="mmt-${mi}" title="${tsLabel}">
+      <div class="ms-check" id="mmc-${mi}">${done?checkSvg():''}</div>
+      <div><div class="ms-toggle-name">${m}</div>${tsLabel?`<div style="font-size:9px;color:var(--text3);font-family:DM Mono,monospace">${tsLabel}</div>`:''}
+      </div></div>`;
+  });
+  document.getElementById('m-milestones').innerHTML=msHtml;
+
+  const cl=getClarity(sid,ci);
+  document.getElementById('m-clarity').innerHTML=[1,2,3,4,5].map(d=>
+    `<div class="cl-option${cl===d?' active-'+d:''}" onclick="setClarityModal(${d})" id="clo-${d}">${d} ΓÇö ${CLARITY_LABELS[d]}</div>`
+  ).join('');
+
+  document.getElementById('m-prompt').textContent=getPrompt(sid,ci);
+  const chatLink=getChatLink(sid,ci);
+  document.getElementById('m-chat-link').value=chatLink;
+  const ob=document.getElementById('m-open-chat');
+  if (chatLink) {ob.href=chatLink;ob.style.display='inline-flex';} else ob.style.display='none';
+
+  renderTimer();
+  document.getElementById('modal-backdrop').classList.add('open');
+}
+
+function getPrompt(sid,ci) {
+  const subj=SUBJECTS[sid]; const ch=subj.chapters[ci];
+  const cl=getClarity(sid,ci);
+  const msArr=MILESTONES.map((m,mi)=>getMs(sid,ci,mi)?`[x] ${m}`:`[ ] ${m}`).join(' ┬╖ ');
+  const clarityNote=cl>0?`Current clarity: ${cl}/5 (${CLARITY_LABELS[cl]}).`:'Not yet rated.';
+  return `CA Final New Scheme 2026 ΓÇö ${subj.label} (Paper ${subj.paper})\nChapter: ${ch.name}\n\nTopics: ${ch.topics}\nProgress: ${msArr}\n${clarityNote}\n\nStart with a diagnostic ΓÇö ask me 3 quick questions on this chapter to assess where I am, then we'll go deep on whatever needs work.`;
+}
+
+function toggleMsModal(mi) {
+  if (!modalCtx) return;
+  const {sid,ci}=modalCtx;
+  const cur=getMs(sid,ci,mi);
+  setMs(sid,ci,mi,!cur);
+  const toggle=document.getElementById('mmt-'+mi);
+  const check=document.getElementById('mmc-'+mi);
+  toggle.className='ms-toggle'+((!cur)?' done':'');
+  check.innerHTML=!cur?checkSvg():'';
+  document.getElementById('m-prompt').textContent=getPrompt(sid,ci);
+  updateStats();
+}
+
+function setClarityModal(v) {
+  if (!modalCtx) return;
+  const {sid,ci}=modalCtx;
+  const cur=getClarity(sid,ci);
+  const nv=cur===v?0:v;
+  setClarity(sid,ci,nv);
+  [1,2,3,4,5].forEach(d=>{
+    document.getElementById('clo-'+d).className='cl-option'+(nv===d?' active-'+d:'');
+  });
+  document.getElementById('m-prompt').textContent=getPrompt(sid,ci);
+}
+
+function saveChatLink() {
+  if (!modalCtx) return;
+  const {sid,ci}=modalCtx;
+  const val=document.getElementById('m-chat-link').value.trim();
+  setChatLink(sid,ci,val);
+  const ob=document.getElementById('m-open-chat');
+  if (val) {ob.href=val;ob.style.display='inline-flex';} else ob.style.display='none';
+  showToast('Chat link saved');
+  rebuildCurrent();
+}
+
+function copyPrompt() {
+  const text=document.getElementById('m-prompt').textContent;
+  navigator.clipboard.writeText(text).then(()=>showToast('Prompt copied ΓÇö paste it in your Claude chat'));
+}
+
+function closeModal(e) { if(e.target===document.getElementById('modal-backdrop')) closeModalDirect(); }
+function closeModalDirect() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+  rebuildCurrent(); modalCtx=null;
+}
+
+// ΓöÇΓöÇ VIEW ROUTING ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+let currentView='home';
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  const nb=document.getElementById('nav-'+name);
+  if (nb) nb.classList.add('active');
+  currentView=name;
+  rebuildCurrent();
+}
+function rebuildCurrent() {
+  if (currentView==='home') { updateStats(); }
+  else if (currentView==='mocks') buildMocksView();
+  else if (currentView==='notes') buildNotesView();
+  else if (currentView==='timer') { renderTimer(); }
+  else if (currentView==='settings') {
+    updateNotificationStatus();
+    const rem=document.getElementById('daily-reminder-time');
+    if (rem) rem.value=state.daily_reminder || '19:00';
+  }
+  else if (SUBJECTS[currentView]) buildSubjectView(currentView);
+}
+
+// ΓöÇΓöÇ TOAST ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ΓöÇΓöÇ RENDER ALL (called on Firebase sync) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+function renderAll() { rebuildCurrent(); updateStats(); renderTimer(); }
+
+// ΓöÇΓöÇ INIT ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+initFirebase();
+setupReminderLoop();
+if (!pomInterval) pomInterval = setInterval(tickPom, 1000);
+window.addEventListener('beforeunload', () => { if (unsubscribe) unsubscribe(); });
 </script>
-
 </body>
 </html>
