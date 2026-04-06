@@ -15,6 +15,7 @@
   --text: #e8e6e1;
   --text2: #9e9b94;
   --accent: #c8b97a;
+  --accent2: #8fb88a;
   --green: #6aaa72;
   --red: #c96a5a;
 }
@@ -30,6 +31,113 @@ body {
 .container {
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.companion-panel {
+  background: var(--bg2);
+  border: 1px solid rgba(200, 185, 122, 0.25);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.companion-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.companion-item {
+  background: var(--bg3);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.companion-label {
+  color: var(--text2);
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+}
+
+.companion-value {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.phase-text {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.muted-hero {
+  color: var(--text2);
+  margin-top: 10px;
+}
+
+.resources-row {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.resource-link {
+  color: var(--accent);
+  text-decoration: none;
+  border: 1px solid rgba(200,185,122,0.35);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+}
+
+.resource-link:hover {
+  background: rgba(200,185,122,0.1);
+}
+
+.focus-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mini-btn {
+  border: 1px solid rgba(200, 185, 122, 0.35);
+  background: transparent;
+  color: var(--accent);
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.mini-btn:hover {
+  background: rgba(200, 185, 122, 0.12);
+}
+
+.badges-wrap {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.badge-chip {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--bg3);
+  color: var(--text2);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.badge-chip.unlocked {
+  color: var(--bg);
+  background: var(--accent2, #8fb88a);
+  border-color: transparent;
+  font-weight: 700;
 }
 
 header {
@@ -76,7 +184,7 @@ h1 {
 
 .subjects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 25px;
   margin-top: 40px;
 }
@@ -198,6 +306,12 @@ h1 {
   min-width: 30px;
 }
 
+.chapter-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .btn {
   padding: 12px 24px;
   background: var(--accent);
@@ -238,8 +352,22 @@ h1 {
 }
 
 @media (max-width: 768px) {
+  body {
+    padding: 12px;
+  }
+
+  .container {
+    max-width: 100%;
+  }
+
+  .companion-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .subjects-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 18px;
   }
   
   h1 {
@@ -249,6 +377,32 @@ h1 {
   .stats-bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+  }
+
+  .stat {
+    padding: 12px 14px;
+  }
+
+  .subject-card {
+    padding: 14px;
+  }
+
+  .chapter-item {
+    padding: 9px;
+  }
+
+  .sync-status {
+    right: 12px;
+    bottom: 12px;
+    font-size: 0.78rem;
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .companion-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -300,6 +454,11 @@ h1 {
 .reward-notification p {
   color: var(--text2);
 }
+
+.reward-meta {
+  font-size: 0.85rem;
+  margin-top: 10px;
+}
 </style>
 </head>
 <body>
@@ -307,8 +466,43 @@ h1 {
 <div class="container">
   <header>
     <h1>📚 CA Final Progress Tracker</h1>
-    <p style="color: var(--text2); margin-top: 10px;">Track your chapters, earn rewards, reach your goal</p>
+    <p class="muted-hero">Track your chapters, earn rewards, reach your goal</p>
+    <div class="resources-row">
+      <a class="resource-link" href="AFM%2010%20Exam%20Oriented_Table%20of%20Contents_Concepts%20.pdf" target="_blank" rel="noopener noreferrer">AFM Chapter PDF</a>
+      <a class="resource-link" href="FR%2010%20Exam%20Oriented_Table%20of%20Contents_Concepts.pdf" target="_blank" rel="noopener noreferrer">FR Chapter PDF</a>
+    </div>
   </header>
+
+  <section class="companion-panel">
+    <div class="companion-grid">
+      <div class="companion-item">
+        <div class="companion-label">Exam Window (Updated)</div>
+        <div class="companion-value">Nov 1st Week 2026</div>
+        <div class="phase-text" id="countdownText">Loading countdown…</div>
+      </div>
+      <div class="companion-item">
+        <div class="companion-label">Current Study Phase</div>
+        <div class="companion-value" id="phaseText">Planning…</div>
+      </div>
+      <div class="companion-item">
+        <div class="companion-label">Today Target</div>
+        <div class="focus-actions">
+          <button class="mini-btn" onclick="adjustDailyTarget(-1)">-</button>
+          <div class="companion-value" id="dailyTargetText">3 chapters</div>
+          <button class="mini-btn" onclick="adjustDailyTarget(1)">+</button>
+        </div>
+        <div class="companion-label" id="todayDoneText">0 done today</div>
+      </div>
+      <div class="companion-item">
+        <div class="companion-label">Focus Recommendation</div>
+        <div class="companion-value" id="focusSuggestion">Tap for next best chapter</div>
+        <div class="focus-actions" id="focusActions">
+          <button class="mini-btn" onclick="pickNextChapter()">Pick Next</button>
+        </div>
+      </div>
+    </div>
+    <div class="badges-wrap" id="badgesWrap"></div>
+  </section>
 
   <div class="stats-bar">
     <div class="stat">
@@ -498,7 +692,16 @@ const CHAPTERS = {
 };
 
 const TOTAL_CHAPTERS = Object.values(CHAPTERS).reduce((sum, arr) => sum + arr.length, 0);
-const POINTS_PER_CHAPTER = 10;
+const EXAM_WINDOW_START = new Date('2026-11-01T00:00:00+05:30');
+const SUBJECT_POINTS = {
+  'Advanced Financial Management': 15,
+  'Financial Reporting': 15,
+  'Direct Tax Laws': 10,
+  'International Taxation': 10,
+  'Indirect Tax Laws': 10,
+  'Audit': 10
+};
+const BADGE_MILESTONES = [10, 25, 50, 75, 100];
 
 // ====== STATE ======
 let userId = localStorage.getItem('userId') || DEFAULT_USER_ID;
@@ -506,6 +709,107 @@ let supabaseUrl = localStorage.getItem('supabaseUrl') || DEFAULT_SUPABASE_URL;
 let supabaseKey = localStorage.getItem('supabaseKey') || DEFAULT_SUPABASE_KEY;
 let supabaseReady = false;
 let localProgress = {};
+let localCompletedAt = JSON.parse(localStorage.getItem('completedAt') || '{}');
+let dailyTarget = parseInt(localStorage.getItem('dailyTarget') || '3', 10);
+let pollTimer = null;
+
+function getChapterPoints(subject) {
+  return SUBJECT_POINTS[subject] || 10;
+}
+
+function getTotalPoints() {
+  return Object.entries(localProgress).reduce((acc, [key, done]) => {
+    if (!done) return acc;
+    const subject = key.split('|')[0];
+    return acc + getChapterPoints(subject);
+  }, 0);
+}
+
+function getTodayCompletedCount() {
+  const today = new Date().toISOString().slice(0, 10);
+  return Object.values(localCompletedAt).filter(v => typeof v === 'string' && v.slice(0, 10) === today).length;
+}
+
+function adjustDailyTarget(delta) {
+  dailyTarget = Math.min(12, Math.max(1, dailyTarget + delta));
+  localStorage.setItem('dailyTarget', String(dailyTarget));
+  renderCompanion();
+}
+
+function renderCompanion() {
+  const now = new Date();
+  const msLeft = EXAM_WINDOW_START.getTime() - now.getTime();
+  const daysLeft = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
+  const countdownText = daysLeft === 0
+    ? 'Exam window has started — stay calm and execute.'
+    : `${daysLeft} day${daysLeft > 1 ? 's' : ''} to go`;
+
+  const phaseDate1 = new Date('2026-08-31T23:59:59+05:30');
+  const phaseDate2 = new Date('2026-09-30T23:59:59+05:30');
+  const phaseDate3 = new Date('2026-10-24T23:59:59+05:30');
+  let phase = 'Phase 4: Final Revision + Rapid Recall';
+  if (now <= phaseDate1) phase = 'Phase 1: Complete 1st Coverage (All Chapters)';
+  else if (now <= phaseDate2) phase = 'Phase 2: Revision 1 + PYQ + RTP';
+  else if (now <= phaseDate3) phase = 'Phase 3: Mocks + Weak-Area Surgery';
+
+  document.getElementById('countdownText').textContent = countdownText;
+  document.getElementById('phaseText').textContent = phase;
+  document.getElementById('dailyTargetText').textContent = `${dailyTarget} chapter${dailyTarget > 1 ? 's' : ''}`;
+
+  const todayDone = getTodayCompletedCount();
+  const remaining = Math.max(0, dailyTarget - todayDone);
+  document.getElementById('todayDoneText').textContent = `${todayDone} done today • ${remaining} to target`;
+
+  renderBadges();
+}
+
+function renderBadges() {
+  const wrap = document.getElementById('badgesWrap');
+  if (!wrap) return;
+  const completed = Object.values(localProgress).filter(Boolean).length;
+  const percent = Math.round((completed / TOTAL_CHAPTERS) * 100);
+  wrap.innerHTML = BADGE_MILESTONES.map(m => {
+    const unlocked = percent >= m;
+    return `<span class="badge-chip ${unlocked ? 'unlocked' : ''}">${m}% ${unlocked ? 'Unlocked' : 'Locked'}</span>`;
+  }).join('');
+}
+
+function pickNextChapter() {
+  const preferred = ['Advanced Financial Management', 'Financial Reporting'];
+  let pick = null;
+
+  for (const subject of preferred) {
+    const chapter = CHAPTERS[subject].find(ch => !localProgress[`${subject}|${ch}`]);
+    if (chapter) {
+      pick = { subject, chapter };
+      break;
+    }
+  }
+
+  if (!pick) {
+    const sorted = Object.entries(CHAPTERS)
+      .map(([subject, chapters]) => {
+        const done = chapters.filter(ch => localProgress[`${subject}|${ch}`]).length;
+        return { subject, chapters, ratio: done / chapters.length };
+      })
+      .sort((a, b) => a.ratio - b.ratio);
+
+    for (const item of sorted) {
+      const chapter = item.chapters.find(ch => !localProgress[`${item.subject}|${ch}`]);
+      if (chapter) {
+        pick = { subject: item.subject, chapter };
+        break;
+      }
+    }
+  }
+
+  const target = document.getElementById('focusSuggestion');
+  if (!pick) {
+    target.textContent = 'All chapters completed — revision + mocks mode unlocked ✅';
+    return;
+  }
+  target.textContent = `${pick.subject} → ${pick.chapter}`;
+}
 
 function getSupabaseHeaders(includeJson = false, includeUpsert = false) {
   const headers = {
@@ -542,16 +846,25 @@ async function initSupabase() {
 async function loadProgressFromSupabase() {
   try {
     const res = await fetch(
-      `${supabaseUrl}/rest/v1/progress?select=subject,chapter_name,completed&user_id=eq.${encodeURIComponent(userId)}`,
+      `${supabaseUrl}/rest/v1/progress?select=subject,chapter_name,completed,completed_at&user_id=eq.${encodeURIComponent(userId)}`,
       { headers: getSupabaseHeaders() }
     );
     if (!res.ok) return;
     const data = await res.json();
+
+    const freshProgress = {};
+    const freshCompletedAt = {};
     
     data.forEach(row => {
       const key = `${row.subject}|${row.chapter_name}`;
-      localProgress[key] = row.completed;
+      freshProgress[key] = !!row.completed;
+      if (row.completed_at) freshCompletedAt[key] = row.completed_at;
     });
+
+    localProgress = freshProgress;
+    localCompletedAt = freshCompletedAt;
+    localStorage.setItem('progress', JSON.stringify(localProgress));
+    localStorage.setItem('completedAt', JSON.stringify(localCompletedAt));
     
     renderUI();
   } catch (e) {
@@ -561,7 +874,8 @@ async function loadProgressFromSupabase() {
 
 function subscribeToChanges() {
   // Polling fallback for real-time (Supabase requires setup for WebSocket)
-  setInterval(loadProgressFromSupabase, 3000);
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(loadProgressFromSupabase, 3000);
 }
 
 // ====== UI RENDERING ======
@@ -596,7 +910,9 @@ function renderUI() {
             <div class="chapter-item ${isCompleted ? 'completed' : ''}" onclick="toggleChapter('${subject}', '${ch.replace(/'/g, "\\'")}')">
               <div class="chapter-checkbox"></div>
               <div class="chapter-name">${ch}</div>
-              <div class="chapter-points">+${POINTS_PER_CHAPTER}</div>
+              <div class="chapter-meta">
+                <div class="chapter-points">+${getChapterPoints(subject)}</div>
+              </div>
             </div>
           `;
         }).join('')}
@@ -607,11 +923,12 @@ function renderUI() {
   });
   
   updateStats();
+  renderCompanion();
 }
 
 function updateStats() {
   const completed = Object.values(localProgress).filter(Boolean).length;
-  const totalPoints = completed * POINTS_PER_CHAPTER;
+  const totalPoints = getTotalPoints();
   const completionPercent = Math.round((completed / TOTAL_CHAPTERS) * 100);
   
   document.getElementById('totalPoints').textContent = totalPoints;
@@ -637,9 +954,12 @@ async function toggleChapter(subject, chapter) {
   const newState = !wasCompleted;
   
   localProgress[key] = newState;
+  if (newState) localCompletedAt[key] = new Date().toISOString();
+  else delete localCompletedAt[key];
   
   // Update local cache
   localStorage.setItem('progress', JSON.stringify(localProgress));
+  localStorage.setItem('completedAt', JSON.stringify(localCompletedAt));
   
   // Update streak
   const today = new Date().toDateString();
@@ -652,7 +972,8 @@ async function toggleChapter(subject, chapter) {
   
   // Show reward notification if completing chapter
   if (newState && !wasCompleted) {
-    showReward(chapter);
+    const completedCount = Object.values(localProgress).filter(Boolean).length;
+    showReward(subject, chapter, getChapterPoints(subject), completedCount);
   }
   
   renderUI();
@@ -682,7 +1003,7 @@ async function updateSupabase(subject, chapter, completed) {
             subject,
             chapter_name: chapter,
             completed: true,
-            completed_at: new Date().toISOString()
+            completed_at: localCompletedAt[`${subject}|${chapter}`] || new Date().toISOString()
           })
         : null
     });
@@ -700,13 +1021,15 @@ async function updateSupabase(subject, chapter, completed) {
   }
 }
 
-function showReward(chapter) {
+function showReward(subject, chapter, points, completedCount) {
+  const completionPercent = Math.round((completedCount / TOTAL_CHAPTERS) * 100);
   const notification = document.createElement('div');
   notification.className = 'reward-notification';
   notification.innerHTML = `
     <h3>🎉 Chapter Complete!</h3>
-    <p>+${POINTS_PER_CHAPTER} Points</p>
-    <p style="font-size: 0.85rem; margin-top: 10px;">${chapter}</p>
+    <p>+${points} Points • ${subject}</p>
+    <p class="reward-meta">${chapter}</p>
+    <p class="reward-meta">Progress: ${completionPercent}% (${completedCount}/${TOTAL_CHAPTERS})</p>
   `;
   
   document.body.appendChild(notification);
@@ -719,6 +1042,7 @@ function showReward(chapter) {
     confetti.style.background = ['#c8b97a', '#8fb88a', '#5a8fc9'][Math.floor(Math.random() * 3)];
     confetti.style.animationDelay = (Math.random() * 0.3) + 's';
     document.body.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3200);
   }
   
   setTimeout(() => notification.remove(), 3000);
@@ -741,6 +1065,8 @@ function updateSyncStatus(syncing = false) {
 // ====== INIT ======
 document.addEventListener('DOMContentLoaded', () => {
   localProgress = JSON.parse(localStorage.getItem('progress') || '{}');
+  localCompletedAt = JSON.parse(localStorage.getItem('completedAt') || '{}');
+  dailyTarget = parseInt(localStorage.getItem('dailyTarget') || '3', 10);
 
   localStorage.setItem('userId', userId);
   localStorage.setItem('supabaseUrl', supabaseUrl);
